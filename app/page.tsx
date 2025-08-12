@@ -44,12 +44,26 @@ export default function App() {
   };
 
   return (
-    <div className="bg-black text-white h-screen overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white relative overflow-hidden">
+      {/* 动态背景装饰 */}
+      <div className="fixed inset-0 bg-gradient-radial opacity-30"></div>
+      
+      {/* 浮动光点 */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-20 left-20 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-1 h-1 bg-pink-400 rounded-full animate-ping"></div>
+        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
+        <div className="absolute top-1/2 right-20 w-1 h-1 bg-purple-400 rounded-full animate-pulse"></div>
+      </div>
+      
       <Header />
       <NotificationPopup />
-      <div className="p-4 overflow-y-auto" style={{ height: "calc(100vh - 64px)" }}>
-        {renderContent()}
-      </div>
+      
+      <main className="relative z-10 p-4 pt-20 min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          {renderContent()}
+        </div>
+      </main>
     </div>
   );
 }

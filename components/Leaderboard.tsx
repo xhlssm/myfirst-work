@@ -59,7 +59,7 @@ export default function Leaderboard() {
                             {sortedFactions.map((faction, index) => (
                                 <li key={faction.id} className="flex items-center space-x-4 p-2 hover:bg-[#2B2B4A] rounded-md transition-colors">
                                     <span className="text-xl font-bold w-6 text-center text-[#B0B0CC]">{index + 1}</span>
-                                    <FactionBadge faction={faction.id} large />
+                                    <FactionBadge faction={faction.id} />
                                     <div className="flex-1">
                                         <span className="font-bold text-white cursor-pointer hover:underline" onClick={() => handleViewFaction(faction.id)}>{faction.name}</span>
                                     </div>

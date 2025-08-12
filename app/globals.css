@@ -83,11 +83,64 @@
   --neon-pink: #FF00FF;
 }
 
+/* 动态背景渐变 */
 body {
   color: var(--foreground);
-  background-color: var(--background);
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0f0f23 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   font-family: 'Terminus', monospace;
   font-weight: normal;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 背景动画 */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 网格背景效果 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 228, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 228, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 浮动粒子效果 */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(0, 228, 255, 0.1), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255, 0, 255, 0.1), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(0, 228, 255, 0.1), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 0, 255, 0.1), transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: float 20s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-100px); }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -96,15 +149,68 @@ h1, h2, h3, h4, h5, h6 {
 
 .neon-text {
   text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+  animation: neonPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes neonPulse {
+  from { text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue); }
+  to { text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 30px var(--neon-blue); }
 }
 
 .cyberpunk-theme .neon-text {
   text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
 }
 
+/* 玻璃态效果 */
+.glass-effect {
+  background: rgba(26, 26, 46, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 228, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 228, 255, 0.1);
+}
+
+/* 卡片悬停效果 */
+.card-hover {
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 228, 255, 0.2);
+}
+
+/* 自定义滚动条 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(26, 26, 46, 0.5);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-blue), var(--neon-pink));
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--neon-pink), var(--neon-blue));
+}
+
 @layer utilities {
   .text-shadow {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .bg-gradient-radial {
+    background: radial-gradient(ellipse at center, rgba(0, 228, 255, 0.1) 0%, transparent 70%);
+  }
+  
+  .border-glow {
+    border: 1px solid var(--neon-blue);
+    box-shadow: 0 0 10px rgba(0, 228, 255, 0.5);
   }
 }
 
