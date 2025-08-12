@@ -9,6 +9,8 @@ export type ThreadType = 'post' | 'mission';
 export interface User {
     id: number;
     username: string;
+    email: string;
+    phone?: string;
     avatarUrl: string;
     reputation: number;
     status: UserStatus;
@@ -19,6 +21,8 @@ export interface User {
     isAdmin: boolean;
     lastOnline: number;
     unlockedAchievements: number[];
+    level: number;
+    experience: number;
 }
 
 export interface Thread {
@@ -106,7 +110,8 @@ interface State {
 }
 
 interface Actions {
-    login: (username: string) => void;
+    login: (identifier: string, password: string) => void;
+    register: (userData: { username: string; email: string; phone?: string; password: string; avatarUrl: string; bio: string; faction: string }) => void;
     logout: () => void;
     setView: (view: View, data?: string | number) => void;
     addThread: (thread: Omit<Thread, 'id' | 'timestamp' | 'replies' | 'likes' | 'dislikes'>) => void;
@@ -128,9 +133,9 @@ interface Actions {
 }
 
 const mockUsers: User[] = [
-    { id: 1, username: 'Cypher', avatarUrl: 'https://cdn.pixabay.com/photo/2023/04/23/12/37/cyborg-7945532_1280.png', reputation: 1500, status: 'online', title: '绳网大师', bio: 'AI核心研究员。', faction: '开发组', badges: ['leader', 'coder'], isAdmin: true, lastOnline: Date.now(), unlockedAchievements: [] },
-    { id: 2, username: 'Nomad', avatarUrl: 'https://cdn.pixabay.com/photo/2023/06/15/09/20/cyberpunk-8064560_1280.jpg', reputation: 850, status: 'away', title: '流浪黑客', bio: '自由的灵魂，穿梭于数据洪流。', faction: '剧情组', badges: ['writer'], isAdmin: false, lastOnline: Date.now() - 3600000, unlockedAchievements: [] },
-    { id: 3, username: 'Ghost', avatarUrl: 'https://cdn.pixabay.com/photo/2023/11/04/16/32/cyborg-8364805_1280.png', reputation: 250, status: 'offline', title: '新手探员', bio: '潜水学习中...', faction: null, badges: [], isAdmin: false, lastOnline: Date.now() - 86400000, unlockedAchievements: [] }
+    { id: 1, username: 'Cypher', email: 'cypher@shangwang.com', phone: '13800138001', avatarUrl: 'https://cdn.pixabay.com/photo/2023/04/23/12/37/cyborg-7945532_1280.png', reputation: 1500, status: 'online', title: '绳网大师', bio: 'AI核心研究员。', faction: '开发组', badges: ['leader', 'coder'], isAdmin: true, lastOnline: Date.now(), unlockedAchievements: [], level: 15, experience: 15000 },
+    { id: 2, username: 'Nomad', email: 'nomad@shangwang.com', phone: '13800138002', avatarUrl: 'https://cdn.pixabay.com/photo/2023/06/15/09/20/cyberpunk-8064560_1280.jpg', reputation: 850, status: 'away', title: '流浪黑客', bio: '自由的灵魂，穿梭于数据洪流。', faction: '剧情组', badges: ['writer'], isAdmin: false, lastOnline: Date.now() - 3600000, unlockedAchievements: [], level: 8, experience: 8000 },
+    { id: 3, username: 'Ghost', email: 'ghost@shangwang.com', phone: '13800138003', avatarUrl: 'https://cdn.pixabay.com/photo/2023/11/04/16/32/cyborg-8364805_1280.png', reputation: 250, status: 'offline', title: '新手探员', bio: '潜水学习中...', faction: null, badges: [], isAdmin: false, lastOnline: Date.now() - 86400000, unlockedAchievements: [], level: 3, experience: 3000 }
 ];
 
 const mockThreads: Thread[] = [
@@ -194,29 +199,51 @@ export const useStore = create<State & Actions>((set, get) => ({
     activeTheme: 'dark',
 
     // Actions
-    login: (username) => {
-        const user = get().users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    login: (identifier: string, password: string) => {
+        // 简单的模拟登录，实际应该验证密码
+        const user = get().users.find(u => 
+            u.username.toLowerCase() === identifier.toLowerCase() || 
+            u.email.toLowerCase() === identifier.toLowerCase() ||
+            u.phone === identifier
+        );
         if (user) {
             const notif: Notification = { id: nextId++, type: 'system', content: `欢迎回来，${user.username}！`, timestamp: Date.now(), read: false };
             set({ user, notifications: [notif] });
             get().checkDailyTasks();
-        } else {
-            const newUser: User = {
-                id: nextId++,
-                username,
-                avatarUrl: 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png',
-                reputation: 0,
-                status: 'online',
-                title: '新手',
-                bio: '初次登录，探索中...',
-                faction: null,
-                badges: [],
-                isAdmin: false,
-                lastOnline: Date.now(),
-                unlockedAchievements: []
-            };
-            set(state => ({ users: [...state.users, newUser], user: newUser, notifications: [{ id: nextId++, type: 'system', content: `欢迎新成员，${newUser.username}！`, timestamp: Date.now(), read: false } as Notification] }));
         }
+    },
+    
+    register: (userData) => {
+        const newUser: User = {
+            id: nextId++,
+            username: userData.username,
+            email: userData.email,
+            phone: userData.phone,
+            avatarUrl: userData.avatarUrl,
+            reputation: 100,
+            status: 'online',
+            title: '新手探员',
+            bio: userData.bio || '这个人很懒，什么都没写...',
+            faction: (userData.faction as Faction) || null,
+            badges: [],
+            isAdmin: false,
+            lastOnline: Date.now(),
+            unlockedAchievements: [],
+            level: 1,
+            experience: 100
+        };
+        
+        set(state => ({
+            users: [...state.users, newUser],
+            user: newUser,
+            notifications: [...state.notifications, {
+                id: nextId++,
+                type: 'system',
+                content: `欢迎加入绳网，${newUser.username}！`,
+                timestamp: Date.now(),
+                read: false
+            } as Notification]
+        }));
     },
     logout: () => set({ user: null, activeView: 'forum', selectedUsername: null }),
     setView: (view, data = null) => set({ activeView: view, selectedUsername: data }),

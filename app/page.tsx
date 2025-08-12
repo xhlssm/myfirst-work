@@ -1,6 +1,11 @@
 "use client";
+import { useState } from "react";
 import { useStore, Faction as FactionType } from "@/store";
 import Header from "@/components/Header";
+import GuideSystem from "@/components/GuideSystem";
+import AuthSystem from "@/components/AuthSystem";
+import { Button } from "@/components/ui/button";
+import { HelpCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 const Forum = dynamic(() => import("@/components/Forum/Forum"), { ssr: false });
 const Leaderboard = dynamic(() => import("@/components/Leaderboard"));
@@ -15,6 +20,8 @@ import NotificationPopup from "@/components/NotificationPopup";
 
 export default function App() {
   const { activeView, selectedUsername } = useStore();
+  const [showGuide, setShowGuide] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const renderContent = () => {
     switch (activeView) {
@@ -59,11 +66,29 @@ export default function App() {
       <Header />
       <NotificationPopup />
       
+      {/* 引导按钮 */}
+      <div className="fixed top-24 right-4 z-40">
+        <Button
+          onClick={() => setShowGuide(true)}
+          className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow rounded-full w-12 h-12 p-0"
+        >
+          <HelpCircle className="w-6 h-6" />
+        </Button>
+      </div>
+      
+      {/* 认证系统 */}
+      <div className="fixed top-24 right-20 z-40">
+        <AuthSystem />
+      </div>
+      
       <main className="relative z-10 p-4 pt-20 min-h-screen">
         <div className="max-w-7xl mx-auto">
           {renderContent()}
         </div>
       </main>
+      
+      {/* 引导系统 */}
+      <GuideSystem isVisible={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 }
