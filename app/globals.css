@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Terminus';
+  src: url('/fonts/TerminusTTF-4.47.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+  --card: 224 71.4% 4.1%;
+  --card-foreground: 210 20% 98%;
+  --popover: 224 71.4% 4.1%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 210 20% 98%;
+  --primary-foreground: 220.9 39.3% 11%;
+  --secondary: 215 27.9% 16.9%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 215 27.9% 16.9%;
+  --muted-foreground: 217.9 10.6% 64.9%;
+  --accent: 215 27.9% 16.9%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 215 27.9% 16.9%;
+  --input: 215 27.9% 16.9%;
+  --ring: 210 20% 98%;
+  --radius: 0.5rem;
+
+  --neon-blue: #00E4FF;
+  --neon-pink: #FF00FF;
+  --dark-blue: #1A1A2E;
+  --light-gray: #B0B0CC;
+  --dark-gray: #24243D;
+}
+
+.dark-theme {
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+  --card: 224 71.4% 4.1%;
+  --card-foreground: 210 20% 98%;
+  --primary: 210 20% 98%;
+  --primary-foreground: 220.9 39.3% 11%;
+}
+
+.high-contrast-theme {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 100%;
+  --secondary-foreground: 0 0% 0%;
+  --border: 0 0% 100%;
+  --input: 0 0% 100%;
+  --ring: 0 0% 100%;
+  --neon-blue: #00FF00;
+  --neon-pink: #FFFF00;
+}
+
+.cyberpunk-theme {
+  --background: 240 20% 8%;
+  --foreground: 220 100% 70%;
+  --card: 240 10% 12%;
+  --card-foreground: 220 100% 70%;
+  --primary: 290 100% 50%;
+  --primary-foreground: 240 20% 8%;
+  --secondary: 220 100% 70%;
+  --secondary-foreground: 240 20% 8%;
+  --muted: 240 10% 18%;
+  --muted-foreground: 220 100% 70%;
+  --accent: 240 10% 18%;
+  --accent-foreground: 220 100% 70%;
+  --border: 240 10% 18%;
+  --input: 240 10% 18%;
+  --ring: 290 100% 50%;
+  --neon-blue: #00E4FF;
+  --neon-pink: #FF00FF;
+}
+
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+  font-family: 'Terminus', monospace;
+  font-weight: normal;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Terminus', monospace;
+}
+
+.neon-text {
+  text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+}
+
+.cyberpunk-theme .neon-text {
+  text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 20px var(--neon-pink);
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  color: var(--neon-blue);
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content p {
+  margin-bottom: 1rem;
+}
+
+.markdown-content img, .markdown-content video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  list-style-position: inside;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-content ul li {
+  list-style-type: '• ';
+}
