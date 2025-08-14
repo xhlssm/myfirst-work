@@ -1,5 +1,19 @@
 'use client';
-import { useState } from 'react';
+
+
+// 类型声明必须在组件函数外部
+interface AuthFormData {
+  email: string;
+  phone: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+  emailCode: string;
+  avatarUrl: string;
+  bio: string;
+  faction: string;
+}
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,16 +36,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store';
 
-interface AuthFormData {
-  email: string;
-  phone: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-  avatarUrl: string;
-  bio: string;
-  faction: string;
-}
+
 
 export default function AuthSystem() {
   const { login, register, user } = useStore();
@@ -47,20 +52,75 @@ export default function AuthSystem() {
     username: '',
     password: '',
     confirmPassword: '',
+    emailCode: '',
     avatarUrl: user?.avatarUrl || 'https://via.placeholder.com/150',
     bio: user?.bio || '',
     faction: user?.faction || ''
   });
 
+  // 邮箱验证码相关
+  const [sentCode, setSentCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [codeTimer, setCodeTimer] = useState(0);
+  const codeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const [errors, setErrors] = useState<Partial<AuthFormData>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+
+  // 增加邮箱格式校验
+  const validateEmail = (email: string) => {
+    // 简单邮箱正则
+    return /^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(email);
+  };
+
+  // 发送验证码
+  const handleSendCode = () => {
+    if (!formData.email) {
+      setErrors(prev => ({ ...prev, email: '请输入邮箱地址' }));
+      return;
+    }
+    if (!validateEmail(formData.email)) {
+      setErrors(prev => ({ ...prev, email: '邮箱格式不正确' }));
+      return;
+    }
+    // 生成6位验证码
+    const code = Math.random().toString().slice(2, 8);
+    setSentCode(code);
+    setCodeSent(true);
+    setErrors(prev => ({ ...prev, emailCode: undefined }));
+    alert(`验证码已发送到邮箱（模拟）：${code}`);
+    setCodeTimer(60);
+    if (codeTimerRef.current) clearInterval(codeTimerRef.current);
+    codeTimerRef.current = setInterval(() => {
+      setCodeTimer(t => {
+        if (t <= 1) {
+          clearInterval(codeTimerRef.current!);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+  };
 
   const validateForm = () => {
     const newErrors: Partial<AuthFormData> = {};
 
     if (isLogin) {
-      if (authMethod === 'email' && !formData.email) {
-        newErrors.email = '请输入邮箱地址';
+      if (authMethod === 'email') {
+        if (!formData.email) {
+          newErrors.email = '请输入邮箱地址';
+        } else if (!validateEmail(formData.email)) {
+          newErrors.email = '邮箱格式不正确';
+        }
+        // 验证码校验
+        if (!codeSent) {
+          newErrors.emailCode = '请先获取验证码';
+        } else if (!formData.emailCode) {
+          newErrors.emailCode = '请输入验证码';
+        } else if (formData.emailCode !== sentCode) {
+          newErrors.emailCode = '验证码不正确';
+        }
       } else if (authMethod === 'phone' && !formData.phone) {
         newErrors.phone = '请输入手机号码';
       }
@@ -71,8 +131,20 @@ export default function AuthSystem() {
       if (!formData.username) {
         newErrors.username = '请输入用户名';
       }
-      if (authMethod === 'email' && !formData.email) {
-        newErrors.email = '请输入邮箱地址';
+      if (authMethod === 'email') {
+        if (!formData.email) {
+          newErrors.email = '请输入邮箱地址';
+        } else if (!validateEmail(formData.email)) {
+          newErrors.email = '邮箱格式不正确';
+        }
+        // 验证码校验
+        if (!codeSent) {
+          newErrors.emailCode = '请先获取验证码';
+        } else if (!formData.emailCode) {
+          newErrors.emailCode = '请输入验证码';
+        } else if (formData.emailCode !== sentCode) {
+          newErrors.emailCode = '验证码不正确';
+        }
       } else if (authMethod === 'phone' && !formData.phone) {
         newErrors.phone = '请输入手机号码';
       }
@@ -367,12 +439,12 @@ export default function AuthSystem() {
             </div>
           )}
 
-          {/* 邮箱/手机号 */}
+          {/* 邮箱/手机号+验证码 */}
           <div>
             <label className="block text-sm font-medium text-white/70 mb-2">
               {authMethod === 'email' ? '邮箱地址' : '手机号码'}
             </label>
-            <div className="relative">
+            <div className="relative flex space-x-2">
               {authMethod === 'email' ? (
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
               ) : (
@@ -382,15 +454,42 @@ export default function AuthSystem() {
                 type={authMethod === 'email' ? 'email' : 'tel'}
                 value={authMethod === 'email' ? formData.email : formData.phone}
                 onChange={(e) => handleInputChange(authMethod, e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white"
+                className="pl-10 bg-white/10 border-white/20 text-white flex-1"
                 placeholder={authMethod === 'email' ? '请输入邮箱地址' : '请输入手机号码'}
               />
+              {authMethod === 'email' && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="btn-glow bg-[var(--neon-blue)] text-[var(--dark-blue)] hover:bg-[var(--neon-pink)] hover:text-[var(--foreground)] px-3"
+                  onClick={handleSendCode}
+                  disabled={codeTimer > 0}
+                >
+                  {codeTimer > 0 ? `${codeTimer}s后重发` : '发送验证码'}
+                </Button>
+              )}
             </div>
             {errors[authMethod] && (
               <p className="text-red-400 text-sm mt-1 flex items-center">
                 <AlertCircle className="w-4 h-4 mr-1" />
                 {errors[authMethod]}
               </p>
+            )}
+            {/* 验证码输入框 */}
+            {authMethod === 'email' && codeSent && (
+              <div className="mt-2 flex items-center space-x-2">
+                <Input
+                  type="text"
+                  value={formData.emailCode}
+                  onChange={e => handleInputChange('emailCode', e.target.value)}
+                  className="bg-white/10 border-white/20 text-white flex-1"
+                  placeholder="请输入邮箱验证码"
+                  maxLength={6}
+                />
+                {errors.emailCode && (
+                  <span className="text-red-400 text-sm flex items-center"><AlertCircle className="w-4 h-4 mr-1" />{errors.emailCode}</span>
+                )}
+              </div>
             )}
           </div>
 

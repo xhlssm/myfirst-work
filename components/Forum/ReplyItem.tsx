@@ -1,3 +1,10 @@
+// 解决 window.__likeReplyLock/__dislikeReplyLock TS 报错
+declare global {
+  interface Window {
+    __likeReplyLock?: boolean;
+    __dislikeReplyLock?: boolean;
+  }
+}
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -83,11 +90,33 @@ const ReplyItem = ({ reply, users, setView, toggleLike, toggleDislike, user, set
         </div>
       </div>
       <div className="flex items-center space-x-4 text-sm text-[var(--light-gray)] pl-10">
-        <Button variant="ghost" className="btn-glow p-0 h-auto text-[var(--light-gray)] hover:text-[var(--neon-green)]" onClick={() => toggleLike(reply.id, true)}>
+        <Button
+          variant="ghost"
+          className="btn-glow p-0 h-auto text-[var(--light-gray)] hover:text-[var(--neon-green)]"
+          onClick={() => {
+            if (!user) return alert('请先登录后再点赞');
+            if (window.__likeReplyLock) return;
+            window.__likeReplyLock = true;
+            toggleLike(reply.id, true);
+            setTimeout(() => { window.__likeReplyLock = false; }, 1000);
+          }}
+          disabled={!user}
+        >
           <ThumbsUp size={16} className="mr-1" />
           <span>{reply.likes}</span>
         </Button>
-        <Button variant="ghost" className="btn-glow p-0 h-auto text-[var(--light-gray)] hover:text-[var(--neon-pink)]" onClick={() => toggleDislike(reply.id, true)}>
+        <Button
+          variant="ghost"
+          className="btn-glow p-0 h-auto text-[var(--light-gray)] hover:text-[var(--neon-pink)]"
+          onClick={() => {
+            if (!user) return alert('请先登录后再点踩');
+            if (window.__dislikeReplyLock) return;
+            window.__dislikeReplyLock = true;
+            toggleDislike(reply.id, true);
+            setTimeout(() => { window.__dislikeReplyLock = false; }, 1000);
+          }}
+          disabled={!user}
+        >
           <ThumbsDown size={16} className="mr-1" />
           <span>{reply.dislikes}</span>
         </Button>
