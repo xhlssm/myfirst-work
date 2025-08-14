@@ -24,12 +24,27 @@ import DOMPurify from 'dompurify';
 import { isImageUrl } from '@/lib/utils';
 
 
+
 export default function ThreadPage() {
     const { threads, users, user, setView, activeView, selectedUsername, addReply, toggleLike, toggleDislike, updateMissionSubtask, submitMissionSolution, approveMission } = useStore();
     const [replyContent, setReplyContent] = useState('');
     const [replyToId, setReplyToId] = useState<number | null>(null);
     const [missionSolution, setMissionSolution] = useState('');
+    const [preview, setPreview] = useState(false);
+    const [isReplying, setIsReplying] = useState(false);
     const replyRef = useRef<HTMLTextAreaElement>(null);
+
+    // 评论提交逻辑优化，支持loading和快捷键
+    function handleReply() {
+        if (!user || !replyContent.trim()) return;
+        setIsReplying(true);
+        setTimeout(() => {
+            addReply(thread.id, { content: replyContent, authorId: user.id }, replyToId || undefined);
+            setReplyContent('');
+            setReplyToId(null);
+            setIsReplying(false);
+        }, 600);
+    }
 
     if (activeView !== 'forum' || typeof selectedUsername !== 'number') return null;
     const thread = threads.find(t => t.id === selectedUsername);
@@ -168,28 +183,39 @@ export default function ThreadPage() {
                             ref={replyRef}
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
-                            placeholder="输入你的回复... 支持图片URL、视频URL。"
+                            placeholder="输入你的回复... 支持图片/视频URL，支持Markdown格式。"
                             className="glass-effect border-glow text-[var(--foreground)] h-24 md:h-32 custom-scrollbar"
                             aria-label="回复内容"
                             maxLength={500}
-                            disabled={!user}
+                            disabled={!user || isReplying}
+                            onKeyDown={e => { if(e.ctrlKey && e.key==='Enter'){ handleReply(); }}}
                         />
                         <div className="flex items-center justify-between text-xs text-[var(--light-gray)]">
                             <span>{replyContent.length}/500 字符</span>
-                            {!user && <span className="text-red-400">请登录后才能回复</span>}
+                            <div className="space-x-2">
+                                <button type="button" className="text-[var(--neon-blue)] hover:underline" onClick={() => setPreview(v => !v)}>{preview ? '关闭预览' : '实时预览'}</button>
+                                {!user && <span className="text-red-400">请登录后才能回复</span>}
+                            </div>
                         </div>
+                        {preview && (
+                            <div className="mt-2 p-2 rounded bg-[#232946] border border-[var(--neon-blue)] text-white text-sm">
+                                {/* 简单图片/视频/Markdown预览 */}
+                                {/^(https?:\/\/).+\.(jpg|jpeg|png|gif|webp)$/i.test(replyContent.trim()) ? (
+                                    <img src={replyContent.trim()} alt="预览图片" className="max-w-full rounded" />
+                                ) : /^(https?:\/\/).+\.(mp4|webm|ogg)$/i.test(replyContent.trim()) ? (
+                                    <video src={replyContent.trim()} controls className="max-w-full rounded" />
+                                ) : (
+                                    <span style={{whiteSpace:'pre-wrap'}}>{replyContent}</span>
+                                )}
+                            </div>
+                        )}
                         <button
-                            onClick={() => {
-                                if (!user || !replyContent.trim()) return;
-                                addReply(thread.id, { content: replyContent, authorId: user.id }, replyToId || undefined);
-                                setReplyContent('');
-                                setReplyToId(null);
-                            }}
+                            onClick={handleReply}
                             className="btn-glow bg-[var(--neon-blue)] text-[var(--dark-blue)] hover:bg-[var(--neon-pink)] hover:text-[var(--foreground)] w-full md:w-auto py-2 px-4 rounded border-glow disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="提交回复"
-                            disabled={!user || !replyContent.trim()}
+                            disabled={!user || !replyContent.trim() || isReplying}
                         >
-                            提交回复
+                            {isReplying ? '提交中...' : '提交回复'}
                         </button>
                     </div>
                 </div>

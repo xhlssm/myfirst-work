@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 
 // 定义基础数据类型
+export interface FactionBoardMessage {
+    id: number;
+    userId: number;
+    content: string;
+    timestamp: number;
+    likes: number;
+}
 export type View = 'forum' | 'profile' | 'shop' | 'factions' | 'leaderboard' | 'achievements' | 'messages' | 'admin' | 'faction_page';
 export type UserStatus = 'online' | 'away' | 'offline' | 'busy';
 export type Faction = '开发组' | '剧情组' | '艺术组' | '自由人' | null;
@@ -29,6 +36,7 @@ export interface Thread {
     id: number;
     title: string;
     content: string;
+    tags?: string[];
     authorId: number;
     timestamp: number;
     likes: number;
@@ -102,7 +110,8 @@ interface State {
     notifications: Notification[];
     shopItems: ShopItem[];
     achievements: Achievement[];
-    factions: { id: Faction; name: string; reputation: number; members: number[] }[];
+    factions: { id: Faction; name: string; reputation: number; members: number[]; announcement?: string }[];
+    factionBoards: { [factionId: string]: FactionBoardMessage[] };
     user: User | null;
     activeView: View;
     selectedUsername: string | number | null;
@@ -126,6 +135,8 @@ interface Actions {
     toggleTheme: (theme: 'dark' | 'high-contrast' | 'cyberpunk') => void;
     updateUser: (updates: Partial<User>) => void;
     joinFaction: (factionId: Faction, userId: number) => void;
+    addFactionBoardMessage: (factionId: Faction, userId: number, content: string) => void;
+    likeFactionBoardMessage: (factionId: Faction, messageId: number, userId: number) => void;
     updateMissionSubtask: (threadId: number, subtaskId: number, completed: boolean) => void;
     submitMissionSolution: (threadId: number, solution: string) => void;
     approveMission: (threadId: number) => void;
@@ -176,10 +187,10 @@ const mockAchievements: Achievement[] = [
 ];
 
 const mockFactions = [
-    { id: '开发组' as Faction, name: '开发组', reputation: 5000, members: [1] },
-    { id: '剧情组' as Faction, name: '剧情组', reputation: 3000, members: [2] },
-    { id: '艺术组' as Faction, name: '艺术组', reputation: 2000, members: [] },
-    { id: '自由人' as Faction, name: '自由人', reputation: 1000, members: [3] }
+    { id: '开发组' as Faction, name: '开发组', reputation: 5000, members: [1], announcement: '开发组：用代码改变世界！' },
+    { id: '剧情组' as Faction, name: '剧情组', reputation: 3000, members: [2], announcement: '剧情组：用故事点亮灵魂！' },
+    { id: '艺术组' as Faction, name: '艺术组', reputation: 2000, members: [], announcement: '艺术组：用创意装点终端！' },
+    { id: '自由人' as Faction, name: '自由人', reputation: 1000, members: [3], announcement: '自由人：无拘无束，畅游绳网！' }
 ];
 
 let nextId = 1000;
@@ -193,6 +204,17 @@ export const useStore = create<State & Actions>((set, get) => ({
     shopItems: mockShopItems,
     achievements: mockAchievements,
     factions: mockFactions,
+    factionBoards: {
+        '开发组': [
+            { id: 1, userId: 1, content: '大家加油，争取本周声望第一！', timestamp: Date.now() - 60000, likes: 2 },
+            { id: 2, userId: 2, content: '欢迎新成员加入！', timestamp: Date.now() - 300000, likes: 1 }
+        ],
+        '剧情组': [
+            { id: 3, userId: 2, content: '剧情组团结协作！', timestamp: Date.now() - 120000, likes: 1 }
+        ],
+        '艺术组': [],
+        '自由人': []
+    },
     user: null,
     activeView: 'forum',
     selectedUsername: null,
@@ -251,6 +273,33 @@ export const useStore = create<State & Actions>((set, get) => ({
         threads: [{ ...thread, id: nextId++, timestamp: Date.now(), replies: [], likes: 0, dislikes: 0 }, ...state.threads],
         notifications: state.user ? [...state.notifications, { id: nextId++, type: 'system', content: `新帖子 "${thread.title}" 已发布！`, timestamp: Date.now(), read: false } as Notification] : state.notifications
     })),
+    addFactionBoardMessage: (factionId, userId, content) => set(state => {
+        const board = state.factionBoards[factionId] || [];
+        const newMsg: FactionBoardMessage = {
+            id: Date.now() + Math.floor(Math.random()*1000),
+            userId,
+            content,
+            timestamp: Date.now(),
+            likes: 0
+        };
+        return {
+            factionBoards: {
+                ...state.factionBoards,
+                [factionId]: [...board, newMsg]
+            }
+        };
+    }),
+    likeFactionBoardMessage: (factionId, messageId, userId) => set(state => {
+        const board = state.factionBoards[factionId] || [];
+        return {
+            factionBoards: {
+                ...state.factionBoards,
+                [factionId]: board.map(msg =>
+                    msg.id === messageId ? { ...msg, likes: msg.likes + 1 } : msg
+                )
+            }
+        };
+    }),
     addReply: (threadId, reply, parentReplyId = undefined) => set(state => {
         const newThreads = state.threads.map(thread => {
             if (thread.id === threadId) {
@@ -289,46 +338,54 @@ export const useStore = create<State & Actions>((set, get) => ({
             : state.notifications;
         return { threads: newThreads, notifications: newNotifications };
     }),
-    toggleLike: (threadId, isReply, replyId) => set(state => ({
-        threads: state.threads.map(thread => {
-            if (thread.id === threadId) {
-                if (isReply && replyId) {
-                    const toggleLikeReply = (replies: Reply[]): Reply[] => replies.map(r => {
-                        if (r.id === replyId) {
-                            return { ...r, likes: r.likes + 1 };
-                        }
-                        if (r.replies.length > 0) {
-                            return { ...r, replies: toggleLikeReply(r.replies) };
-                        }
-                        return r;
-                    });
-                    return { ...thread, replies: toggleLikeReply(thread.replies) };
+    toggleLike: (threadId, isReply, replyId) => set(state => {
+        if (!state.user) return state; // 未登录禁止
+        // 可扩展：同一用户只能点赞一次（可用本地Storage或user结构记录）
+        return {
+            threads: state.threads.map(thread => {
+                if (thread.id === threadId) {
+                    if (isReply && replyId) {
+                        const toggleLikeReply = (replies: Reply[]): Reply[] => replies.map(r => {
+                            if (r.id === replyId) {
+                                return { ...r, likes: r.likes + 1 };
+                            }
+                            if (r.replies.length > 0) {
+                                return { ...r, replies: toggleLikeReply(r.replies) };
+                            }
+                            return r;
+                        });
+                        return { ...thread, replies: toggleLikeReply(thread.replies) };
+                    }
+                    return { ...thread, likes: thread.likes + 1 };
                 }
-                return { ...thread, likes: thread.likes + 1 };
-            }
-            return thread;
-        })
-    })),
-    toggleDislike: (threadId, isReply, replyId) => set(state => ({
-        threads: state.threads.map(thread => {
-            if (thread.id === threadId) {
-                if (isReply && replyId) {
-                    const toggleDislikeReply = (replies: Reply[]): Reply[] => replies.map(r => {
-                        if (r.id === replyId) {
-                            return { ...r, dislikes: r.dislikes + 1 };
-                        }
-                        if (r.replies.length > 0) {
-                            return { ...r, replies: toggleDislikeReply(r.replies) };
-                        }
-                        return r;
-                    });
-                    return { ...thread, replies: toggleDislikeReply(thread.replies) };
+                return thread;
+            })
+        };
+    }),
+    toggleDislike: (threadId, isReply, replyId) => set(state => {
+        if (!state.user) return state; // 未登录禁止
+        // 可扩展：同一用户只能点踩一次（可用本地Storage或user结构记录）
+        return {
+            threads: state.threads.map(thread => {
+                if (thread.id === threadId) {
+                    if (isReply && replyId) {
+                        const toggleDislikeReply = (replies: Reply[]): Reply[] => replies.map(r => {
+                            if (r.id === replyId) {
+                                return { ...r, dislikes: r.dislikes + 1 };
+                            }
+                            if (r.replies.length > 0) {
+                                return { ...r, replies: toggleDislikeReply(r.replies) };
+                            }
+                            return r;
+                        });
+                        return { ...thread, replies: toggleDislikeReply(thread.replies) };
+                    }
+                    return { ...thread, dislikes: thread.dislikes + 1 };
                 }
-                return { ...thread, dislikes: thread.dislikes + 1 };
-            }
-            return thread;
-        })
-    })),
+                return thread;
+            })
+        };
+    }),
     sendMessage: (receiverId, content) => set(state => {
         const newMsg: Message = { id: nextId++, senderId: state.user!.id, receiverId, content, timestamp: Date.now(), read: false };
         const receiverUser = state.users.find(u => u.id === receiverId);

@@ -13,7 +13,7 @@ interface AuthFormData {
   bio: string;
   faction: string;
 }
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,12 +40,16 @@ import { useStore } from '@/store';
 
 export default function AuthSystem() {
   const { login, register, user } = useStore();
+
+  // 状态分组：认证流程
   const [isLogin, setIsLogin] = useState(true);
   const [isProfileEdit, setIsProfileEdit] = useState(false);
+  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
+  const [isLoading, setIsLoading] = useState(false);
+  // 密码可见性
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
-  
+  // 表单数据
   const [formData, setFormData] = useState<AuthFormData>({
     email: '',
     phone: '',
@@ -57,15 +61,30 @@ export default function AuthSystem() {
     bio: user?.bio || '',
     faction: user?.faction || ''
   });
-
-  // 邮箱验证码相关
+  // 验证码相关
   const [sentCode, setSentCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [codeTimer, setCodeTimer] = useState(0);
   const codeTimerRef = useRef<NodeJS.Timeout | null>(null);
-
+  // 错误提示
   const [errors, setErrors] = useState<Partial<AuthFormData>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  // 顶部验证码提示条
+  const [codeTip, setCodeTip] = useState('');
+
+  // 切换登录/注册时自动清空错误和验证码
+  useEffect(() => {
+    setErrors({});
+    setCodeSent(false);
+    setSentCode('');
+    setFormData(f => ({ ...f, emailCode: '' }));
+  }, [isLogin, authMethod]);
+
+  // 组件卸载时清理定时器
+  useEffect(() => {
+    return () => {
+      if (codeTimerRef.current) clearInterval(codeTimerRef.current);
+    };
+  }, []);
 
 
   // 增加邮箱格式校验
@@ -89,13 +108,14 @@ export default function AuthSystem() {
     setSentCode(code);
     setCodeSent(true);
     setErrors(prev => ({ ...prev, emailCode: undefined }));
-    alert(`验证码已发送到邮箱（模拟）：${code}`);
+    setCodeTip(`验证码已发送到邮箱（模拟）：${code}`);
+    setTimeout(() => setCodeTip(''), 5000);
     setCodeTimer(60);
     if (codeTimerRef.current) clearInterval(codeTimerRef.current);
     codeTimerRef.current = setInterval(() => {
       setCodeTimer(t => {
         if (t <= 1) {
-          clearInterval(codeTimerRef.current!);
+          if (codeTimerRef.current) clearInterval(codeTimerRef.current);
           return 0;
         }
         return t - 1;
@@ -237,6 +257,11 @@ export default function AuthSystem() {
                   src={formData.avatarUrl}
                   alt="头像"
                   className="w-24 h-24 rounded-full object-cover border-4 border-[#00E4FF]/30"
+                  onError={e => {
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = 'https://via.placeholder.com/150?text=No+Image';
+                  }}
                 />
                 {isProfileEdit && (
                   <Button
@@ -257,7 +282,10 @@ export default function AuthSystem() {
                   <Input
                     value={formData.username}
                     onChange={(e) => handleInputChange('username', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white"
+                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
+                    placeholder="用户名 (2-12字)"
+                    aria-describedby={errors.username ? 'username-error' : undefined}
+                    aria-invalid={!!errors.username}
                   />
                 ) : (
                   <div className="p-3 bg-white/5 rounded-lg border border-white/10">
@@ -273,7 +301,9 @@ export default function AuthSystem() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white"
+                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
+                    aria-describedby={errors.email ? 'email-error' : undefined}
+                    aria-invalid={!!errors.email}
                   />
                 ) : (
                   <div className="p-3 bg-white/5 rounded-lg border border-white/10">
@@ -289,7 +319,9 @@ export default function AuthSystem() {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white"
+                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
+                    aria-describedby={errors.phone ? 'phone-error' : undefined}
+                    aria-invalid={!!errors.phone}
                   />
                 ) : (
                   <div className="p-3 bg-white/5 rounded-lg border border-white/10">
@@ -304,7 +336,7 @@ export default function AuthSystem() {
                   <Input
                     value={formData.faction}
                     onChange={(e) => handleInputChange('faction', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white"
+                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
                   />
                 ) : (
                   <div className="p-3 bg-white/5 rounded-lg border border-white/10">
@@ -322,8 +354,10 @@ export default function AuthSystem() {
                   value={formData.bio}
                   onChange={(e) => handleInputChange('bio', e.target.value)}
                   rows={3}
-                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white resize-none"
-                  placeholder="介绍一下你自己..."
+                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white resize-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
+                  placeholder="介绍一下你自己...（可选）"
+                  aria-describedby={errors.bio ? 'bio-error' : undefined}
+                  aria-invalid={!!errors.bio}
                 />
               ) : (
                 <div className="p-3 bg-white/5 rounded-lg border border-white/10">
@@ -348,6 +382,7 @@ export default function AuthSystem() {
                     onClick={handleProfileUpdate}
                     disabled={isLoading}
                     className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow"
+                    aria-disabled={isLoading}
                   >
                     <Save className="w-4 h-4 mr-2" />
                     {isLoading ? '保存中...' : '保存'}
@@ -372,13 +407,34 @@ export default function AuthSystem() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow">
-          <User className="w-4 h-4 mr-2" />
+        <Button className="bg-gradient-to-r from-[var(--neon-blue)] to-[var(--neon-pink)] text-white hover:from-[var(--neon-blue)]/90 hover:to-[var(--neon-pink)]/90 btn-glow px-8 py-3 text-lg font-bold shadow-lg rounded-xl">
+          <User className="w-5 h-5 mr-2" />
           {isLogin ? '登录' : '注册'}
         </Button>
       </DialogTrigger>
-      
-      <DialogContent className="glass-effect-strong border-[#00E4FF]/50 max-w-md">
+
+      {/* 居中大弹窗，带明显遮罩和动画 */}
+      <DialogContent
+        className="glass-effect-strong border-[var(--neon-blue)]/80 max-w-lg w-full mx-auto rounded-2xl shadow-2xl p-0 animate-dialog-pop relative neon-glow"
+        style={{
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          position: 'fixed',
+          zIndex: 10000,
+          background: 'rgba(35,41,70,0.98)',
+          boxShadow: '0 0 40px 8px var(--neon-blue), 0 8px 40px 0 rgba(62,207,255,0.15), 0 1.5px 0 rgba(255,255,255,0.08)'
+        }}
+      >
+        {/* 顶部验证码 neon 提示条 */}
+        {codeTip && (
+          <div className="w-full text-center py-2 px-4 mb-2 bg-gradient-to-r from-[var(--neon-blue)]/80 to-[var(--neon-pink)]/80 text-white font-bold rounded-t-2xl animate-fade-in shadow-lg">
+            {codeTip}
+          </div>
+        )}
+
+        {/* 霓虹光晕特效 */}
+        <div className="pointer-events-none absolute -inset-8 z-0 blur-2xl opacity-60" style={{background: 'radial-gradient(circle, var(--neon-blue) 0%, transparent 70%)'}} />
         <DialogHeader>
           <DialogTitle className="text-xl font-bold neon-text text-center">
             {isLogin ? '欢迎回来' : '加入我们'}
@@ -426,16 +482,20 @@ export default function AuthSystem() {
                   type="text"
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white"
+                  className="pl-10 bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
                   placeholder="请输入用户名"
+                  autoComplete="username"
+                  aria-label="用户名"
+                  disabled={isLoading}
+                  onFocus={e => e.target.scrollIntoView({behavior:'smooth',block:'center'})}
                 />
+                {/* 辅助提示 */}
+                {errors.username && (
+                  <div className="text-red-500 text-xs font-bold mb-1 flex items-center animate-shake animate-fade-in border-l-4 border-[var(--neon-pink)] pl-2 bg-white/5/50 shadow-[0_0_8px_0_var(--neon-pink)]">
+                    <AlertCircle className="w-4 h-4 mr-1" />{errors.username}
+                  </div>
+                )}
               </div>
-              {errors.username && (
-                <p className="text-red-400 text-sm mt-1 flex items-center">
-                  <AlertCircle className="w-4 h-4 mr-1" />
-                  {errors.username}
-                </p>
-              )}
             </div>
           )}
 
@@ -454,43 +514,20 @@ export default function AuthSystem() {
                 type={authMethod === 'email' ? 'email' : 'tel'}
                 value={authMethod === 'email' ? formData.email : formData.phone}
                 onChange={(e) => handleInputChange(authMethod, e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white flex-1"
-                placeholder={authMethod === 'email' ? '请输入邮箱地址' : '请输入手机号码'}
+                className="pl-10 bg-white/10 border-white/20 text-white flex-1 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
+                placeholder={authMethod === 'email' ? '邮箱地址（必填）' : '手机号码（必填）'}
+                autoComplete={authMethod === 'email' ? 'email' : 'tel'}
+                aria-label={authMethod === 'email' ? '邮箱地址' : '手机号码'}
+                disabled={isLoading}
+                onFocus={e => e.target.scrollIntoView({behavior:'smooth',block:'center'})}
               />
-              {authMethod === 'email' && (
-                <Button
-                  type="button"
-                  size="sm"
-                  className="btn-glow bg-[var(--neon-blue)] text-[var(--dark-blue)] hover:bg-[var(--neon-pink)] hover:text-[var(--foreground)] px-3"
-                  onClick={handleSendCode}
-                  disabled={codeTimer > 0}
-                >
-                  {codeTimer > 0 ? `${codeTimer}s后重发` : '发送验证码'}
-                </Button>
+              {/* 辅助提示 */}
+              {errors[authMethod] && (
+                <div className="text-red-500 text-xs font-bold mb-1 flex items-center animate-shake animate-fade-in border-l-4 border-[var(--neon-pink)] pl-2 bg-white/5/50 shadow-[0_0_8px_0_var(--neon-pink)]">
+                  <AlertCircle className="w-4 h-4 mr-1" />{errors[authMethod]}
+                </div>
               )}
             </div>
-            {errors[authMethod] && (
-              <p className="text-red-400 text-sm mt-1 flex items-center">
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {errors[authMethod]}
-              </p>
-            )}
-            {/* 验证码输入框 */}
-            {authMethod === 'email' && codeSent && (
-              <div className="mt-2 flex items-center space-x-2">
-                <Input
-                  type="text"
-                  value={formData.emailCode}
-                  onChange={e => handleInputChange('emailCode', e.target.value)}
-                  className="bg-white/10 border-white/20 text-white flex-1"
-                  placeholder="请输入邮箱验证码"
-                  maxLength={6}
-                />
-                {errors.emailCode && (
-                  <span className="text-red-400 text-sm flex items-center"><AlertCircle className="w-4 h-4 mr-1" />{errors.emailCode}</span>
-                )}
-              </div>
-            )}
           </div>
 
           {/* 密码 */}
@@ -502,8 +539,16 @@ export default function AuthSystem() {
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className="pl-10 pr-10 bg-white/10 border-white/20 text-white"
-                placeholder="请输入密码"
+                className="pl-10 pr-10 bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
+                placeholder="密码（6位以上）"
+                autoComplete="current-password"
+                aria-label="密码"
+                aria-describedby={errors.password ? 'password-error' : undefined}
+                aria-invalid={!!errors.password}
+                disabled={isLoading}
+                ref={el => { if (el && errors.password && !formData.password) el.focus(); }}
+                onFocus={e => e.target.scrollIntoView({behavior:'smooth',block:'center'})}
+                onKeyDown={e => { if(e.key==='Enter'){ e.currentTarget.form?.dispatchEvent(new Event('submit', {cancelable:true,bubbles:true})); }}}
               />
               <Button
                 type="button"
@@ -511,15 +556,16 @@ export default function AuthSystem() {
                 size="sm"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-0 top-0 h-full px-3 text-white/50 hover:text-white hover:bg-white/10"
+                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                title={showPassword ? '隐藏密码' : '显示密码'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
             </div>
             {errors.password && (
-              <p className="text-red-400 text-sm mt-1 flex items-center">
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {errors.password}
-              </p>
+              <div className="text-red-500 text-xs font-bold mb-1 flex items-center animate-shake animate-fade-in" id="password-error">
+                <AlertCircle className="w-4 h-4 mr-1" />{errors.password}
+              </div>
             )}
           </div>
 
@@ -533,8 +579,15 @@ export default function AuthSystem() {
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className="pl-10 pr-10 bg-white/10 border-white/20 text-white"
-                  placeholder="请再次输入密码"
+                  className="pl-10 pr-10 bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
+                  placeholder="确认密码"
+                  autoComplete="new-password"
+                  aria-label="确认密码"
+                  disabled={isLoading}
+                  onFocus={e => e.target.scrollIntoView({behavior:'smooth',block:'center'})}
+                  onKeyDown={e => { if(e.key==='Enter'){ e.currentTarget.form?.dispatchEvent(new Event('submit', {cancelable:true,bubbles:true})); }}}
+                  aria-describedby={errors.confirmPassword ? 'confirmpw-error' : undefined}
+                  aria-invalid={!!errors.confirmPassword}
                 />
                 <Button
                   type="button"
@@ -542,15 +595,16 @@ export default function AuthSystem() {
                   size="sm"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-0 top-0 h-full px-3 text-white/50 hover:text-white hover:bg-white/10"
+                  aria-label={showConfirmPassword ? '隐藏密码' : '显示密码'}
+                  title={showConfirmPassword ? '隐藏密码' : '显示密码'}
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-red-400 text-sm mt-1 flex items-center">
-                  <AlertCircle className="w-4 h-4 mr-1" />
-                  {errors.confirmPassword}
-                </p>
+                <div className="text-red-500 text-xs font-bold mb-1 flex items-center animate-shake animate-fade-in" id="confirmpw-error">
+                  <AlertCircle className="w-4 h-4 mr-1" />{errors.confirmPassword}
+                </div>
               )}
             </div>
           )}
@@ -559,11 +613,13 @@ export default function AuthSystem() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow"
+            className="w-full bg-gradient-to-r from-[var(--neon-blue)] to-[var(--neon-pink)] text-white hover:from-[var(--neon-blue)]/90 hover:to-[var(--neon-pink)]/90 btn-glow focus:ring-2 focus:ring-[var(--neon-pink)] focus:shadow-[0_0_12px_2px_var(--neon-pink)] hover:shadow-[0_0_16px 4px_var(--neon-pink)] hover:scale-105 transition-all duration-200 active:scale-95 active:brightness-110"
+            tabIndex={0}
+            aria-disabled={isLoading}
           >
             {isLoading ? (
               <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 border-t-transparent border-l-transparent"></div>
                 {isLogin ? '登录中...' : '注册中...'}
               </div>
             ) : (

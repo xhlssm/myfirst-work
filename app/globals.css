@@ -1,3 +1,35 @@
+/* 慢速旋转动画，用于neon标签等 */
+.animate-spin-slow {
+  animation: spin 3.5s linear infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes dialog-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(40px);
+    filter: blur(8px);
+  }
+  80% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+.animate-dialog-pop {
+  animation: dialog-pop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neon-glow {
+  box-shadow: 0 0 32px 8px var(--neon-blue), 0 0 16px 4px var(--neon-pink), 0 8px 40px 0 rgba(62,207,255,0.15);
+  border: 2px solid var(--neon-blue);
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,34 +42,34 @@
 }
 
 :root {
-  --background: 224 71.4% 4.1%;
-  --foreground: 210 20% 98%;
-  --card: 224 71.4% 4.1%;
-  --card-foreground: 210 20% 98%;
-  --popover: 224 71.4% 4.1%;
-  --popover-foreground: 210 20% 98%;
-  --primary: 210 20% 98%;
-  --primary-foreground: 220.9 39.3% 11%;
-  --secondary: 215 27.9% 16.9%;
-  --secondary-foreground: 210 20% 98%;
-  --muted: 215 27.9% 16.9%;
-  --muted-foreground: 217.9 10.6% 64.9%;
-  --accent: 215 27.9% 16.9%;
-  --accent-foreground: 210 20% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 20% 98%;
-  --border: 215 27.9% 16.9%;
-  --input: 215 27.9% 16.9%;
-  --ring: 210 20% 98%;
+  --background: 220 16% 12%; /* 柔和深蓝灰 */
+  --foreground: 220 20% 96%; /* 柔和亮灰 */
+  --card: 220 16% 16%;
+  --card-foreground: 220 20% 96%;
+  --popover: 220 16% 18%;
+  --popover-foreground: 220 20% 96%;
+  --primary: 217 91% 60%; /* 柔和蓝 */
+  --primary-foreground: 220 20% 96%;
+  --secondary: 260 10% 30%; /* 柔和紫灰 */
+  --secondary-foreground: 220 20% 96%;
+  --muted: 220 10% 24%;
+  --muted-foreground: 220 10% 60%;
+  --accent: 200 100% 85%; /* 柔和青蓝 */
+  --accent-foreground: 220 20% 96%;
+  --destructive: 0 70% 50%;
+  --destructive-foreground: 220 20% 96%;
+  --border: 220 10% 30%;
+  --input: 220 10% 24%;
+  --ring: 217 91% 60%;
   --radius: 0.5rem;
 
-  --neon-blue: #00E4FF;
-  --neon-pink: #FF00FF;
-  --neon-green: #00FF88;
-  --neon-purple: #8B5CF6;
-  --dark-blue: #1A1A2E;
-  --light-gray: #B0B0CC;
-  --dark-gray: #24243D;
+  --neon-blue: #3ECFFF; /* 柔和蓝 */
+  --neon-pink: #FF7EDB; /* 柔和粉 */
+  --neon-green: #5FFFB0; /* 柔和绿 */
+  --neon-purple: #B39DFF; /* 柔和紫 */
+  --dark-blue: #232946;   /* 柔和深蓝 */
+  --light-gray: #E0E3EB;  /* 柔和浅灰 */
+  --dark-gray: #232946;   /* 柔和深灰 */
   --gold: #FFD700;
   --silver: #C0C0C0;
   --bronze: #CD7F32;
