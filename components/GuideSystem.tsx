@@ -262,3 +262,4 @@ export default function GuideSystem({ isVisible, onClose }: GuideSystemProps) {
     </motion.div>
   );
 }
+
