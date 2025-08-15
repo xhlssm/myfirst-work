@@ -83,6 +83,7 @@ export default function App() {
       
       <main className="relative z-10 p-4 pt-20 min-h-screen">
         <div className="max-w-7xl mx-auto">
+          <div style={{fontSize:24,color:'#00e4ff',marginBottom:16}}>主内容测试</div>
           {renderContent()}
         </div>
       </main>
