@@ -114,6 +114,25 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
             setErrorMsg('内容不能为空！');
             return;
         }
+        // 推广/广告/外链内容校验
+        const forbiddenLinks = [
+          /taobao\.com/i,
+          /pinduoduo\.com/i,
+          /jd\.com/i,
+          /douyin\.com/i,
+          /kuaishou\.com/i,
+          /weixin\.qq\.com/i,
+          /t\.me\//i,
+          /qun\.qq\.com/i,
+          /discord\.gg/i,
+          /http(s)?:\/\/(?![\w.-]*wang(\.|$))/i, // 非本站外链
+        ];
+        for (const reg of forbiddenLinks) {
+          if (reg.test(content)) {
+            setErrorMsg('检测到推广/广告/外部链接，禁止直接发布！');
+            return;
+          }
+        }
         if (threadType === 'mission') {
             if (user.reputation < missionReward) {
                 setErrorMsg('声望不足，无法发布该任务！');
@@ -153,21 +172,21 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="bg-gradient-to-br from-[#181824] via-[#232946] to-[#1A1A2E] text-white border-[var(--neon-blue)] max-w-lg w-full mx-auto rounded-3xl shadow-[0_8px_48px_#00e4ff44] animate-dialog-pop p-0 overflow-hidden">
-                <DialogHeader className="bg-gradient-to-r from-[#00E4FF]/30 to-[#FF00FF]/20 px-8 py-6 rounded-t-3xl border-b border-[#00E4FF]/20">
-                    <DialogTitle className="text-2xl font-bold neon-text drop-shadow-lg">发布新内容</DialogTitle>
-                    <DialogDescription className="text-[#B0B0CC] mt-1 text-base">在这里分享你的想法或发布一个任务。</DialogDescription>
+        <DialogContent className="bg-gradient-to-br from-[#181824ee] via-[#232946cc] to-[#1A1A2Ecc] text-white border-2 border-[#00e4ff]/40 max-w-xl w-full mx-auto rounded-3xl shadow-[0_8px_48px_#00e4ff66] animate-dialog-pop p-0 overflow-hidden ring-2 ring-[#00e4ff]/20">
+                <DialogHeader className="bg-gradient-to-r from-[#00E4FF]/30 to-[#FF00FF]/20 px-10 py-7 rounded-t-3xl border-b-2 border-[#00E4FF]/20 shadow-lg">
+                    <DialogTitle className="text-3xl font-extrabold neon-text drop-shadow-glow tracking-widest">发布新内容</DialogTitle>
+                    <DialogDescription className="text-[#B0B0CC] mt-2 text-lg">在这里分享你的想法或发布一个任务。</DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-6 py-6 px-8">
+                <div className="grid gap-8 py-8 px-10">
                     <div className="grid grid-cols-4 items-center gap-4">
                         <label htmlFor="thread-type" className="text-right text-[#B0B0CC]">
                             类型
                         </label>
                         <Select value={threadType} onValueChange={(value: 'post' | 'mission') => setThreadType(value)}>
-                            <SelectTrigger className="col-span-3 bg-transparent text-white border-[#00E4FF]">
+                            <SelectTrigger className="col-span-3 bg-gradient-to-r from-[#232946] to-[#181824] text-white border-2 border-[#00E4FF]/40 rounded-xl shadow-inner focus:ring-2 focus:ring-[#00E4FF]">
                                 <SelectValue placeholder="选择类型" />
                             </SelectTrigger>
-                            <SelectContent className="bg-[#1A1A2E] text-white border-[#00E4FF]">
+                            <SelectContent className="bg-[#1A1A2E] text-white border-2 border-[#00E4FF]/40 rounded-xl shadow-lg">
                                 <SelectItem value="post">帖子</SelectItem>
                                 <SelectItem value="mission">任务</SelectItem>
                             </SelectContent>
@@ -209,16 +228,16 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
                         <label htmlFor="content" className="text-right text-[#B0B0CC]">
                             内容
                         </label>
-                        <div className="col-span-3 space-y-3">
+                        <div className="col-span-3 space-y-4">
                             <div className="flex items-center gap-2 mb-1">
                                 <input type="file" accept="image/*" onChange={handleImageUpload} disabled={imageUploading || isLoading} className="text-xs" />
                                 {imageUploading && <span className="text-xs text-[var(--neon-blue)] animate-pulse">图片上传中...</span>}
-                                <button type="button" className="ml-2 text-[var(--neon-blue)] text-sm px-3 py-1 rounded-full bg-gradient-to-r from-[#00E4FF]/10 to-[#FF00FF]/10 border border-[var(--neon-blue)]/40 shadow hover:bg-[#232946] transition-all" onClick={()=>setShowEmoji(v=>!v)}>
+                                <button type="button" className="ml-2 text-[var(--neon-blue)] text-base px-4 py-1.5 rounded-full bg-gradient-to-r from-[#00E4FF]/20 to-[#FF00FF]/20 border-2 border-[var(--neon-blue)]/40 shadow-lg hover:bg-[#232946] hover:scale-105 transition-all font-bold" onClick={()=>setShowEmoji(v=>!v)}>
                                     {showEmoji ? '关闭表情' : '😀 表情'}
                                 </button>
                             </div>
                             {showEmoji && (
-                                <div className="flex flex-wrap gap-1 p-2 bg-gradient-to-r from-[#232946] to-[#181824] border border-[var(--neon-blue)] rounded-xl mb-2 max-w-xs animate-fade-in shadow">
+                                <div className="flex flex-wrap gap-1 p-2 bg-gradient-to-r from-[#232946] to-[#181824] border-2 border-[var(--neon-blue)] rounded-2xl mb-2 max-w-xs animate-fade-in shadow-lg">
                                     {emojiList.map(e=>(
                                         <button key={e} type="button" className="text-2xl hover:scale-125 transition-all" onClick={()=>insertEmoji(e)}>{e}</button>
                                     ))}
@@ -229,17 +248,17 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
                                 ref={contentRef}
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
-                                className="bg-gradient-to-br from-[#232946] to-[#181824] text-white border-2 border-[#00E4FF]/40 h-32 rounded-xl shadow-inner focus:ring-2 focus:ring-[#00E4FF]"
+                                className="bg-gradient-to-br from-[#232946] to-[#181824] text-white border-2 border-[#00E4FF]/40 h-36 rounded-2xl shadow-inner focus:ring-2 focus:ring-[#00E4FF] text-base px-4 py-3"
                                 maxLength={1000}
                                 placeholder="支持插入图片/视频URL，支持Markdown格式，可上传图片"
                                 disabled={isLoading || imageUploading}
                                 onKeyDown={e => { if(e.ctrlKey && e.key==='Enter'){ handleSubmit(); }}}
                             />
                             <div className="flex items-center justify-between text-xs text-[var(--light-gray)] mt-1">
-                                <span className="rounded-full bg-[#232946] px-3 py-1 text-[var(--neon-blue)] font-bold shadow-inner">{content.length}/1000 字符</span>
-                                <div className="flex gap-2">
-                                    <button type="button" className="text-[var(--neon-blue)] hover:underline font-bold" onClick={() => setPreview(v => !v)}>{preview ? '关闭预览' : '实时预览'}</button>
-                                    <button type="button" className="text-[var(--neon-blue)] hover:underline font-bold" onClick={handleAISuggest} disabled={aiLoading || !content.trim()}>{aiLoading ? 'AI分析中...' : 'AI推荐标签'}</button>
+                                <span className="rounded-full bg-[#232946] px-4 py-1.5 text-[var(--neon-blue)] font-bold shadow-inner border border-[#00e4ff]/30">{content.length}/1000 字符</span>
+                                <div className="flex gap-3">
+                                    <button type="button" className="text-[var(--neon-blue)] hover:underline font-bold text-base" onClick={() => setPreview(v => !v)}>{preview ? '关闭预览' : '实时预览'}</button>
+                                    <button type="button" className="text-[var(--neon-blue)] hover:underline font-bold text-base" onClick={handleAISuggest} disabled={aiLoading || !content.trim()}>{aiLoading ? 'AI分析中...' : 'AI推荐标签'}</button>
                                 </div>
                             </div>
                             {preview && (
@@ -263,15 +282,15 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
                 {tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
                         {tags.map(tag => (
-                            <span key={tag} className="px-3 py-1 rounded-full bg-gradient-to-r from-[#00E4FF]/30 to-[#FF00FF]/20 text-[var(--neon-blue)] text-xs font-bold border border-[var(--neon-blue)]/40 shadow animate-glow">#{tag}</span>
+                            <span key={tag} className="px-4 py-1.5 rounded-full bg-gradient-to-r from-[#00E4FF]/30 to-[#FF00FF]/20 text-[var(--neon-blue)] text-base font-bold border-2 border-[var(--neon-blue)]/40 shadow-lg animate-glow tracking-wide">#{tag}</span>
                         ))}
                     </div>
                 )}
-                <div className="flex justify-end space-x-2 mt-4">
-                    <Button variant="secondary" onClick={onClose} className="bg-gradient-to-r from-[#232946] to-[#2B2B4A] hover:bg-[#3D3D5A] text-white rounded-full px-6 py-2 shadow" disabled={isLoading}>
+                <div className="flex justify-end space-x-4 mt-6">
+                    <Button variant="secondary" onClick={onClose} className="bg-gradient-to-r from-[#232946] to-[#2B2B4A] hover:bg-[#3D3D5A] text-white rounded-full px-8 py-2.5 shadow-lg border-2 border-[#00e4ff]/30 text-lg font-bold" disabled={isLoading}>
                         取消
                     </Button>
-                    <Button onClick={handleSubmit} className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white font-bold rounded-full px-8 py-2 shadow-lg hover:from-[#00BFFF] hover:to-[#FF88FF] animate-glow" disabled={isLoading || !title.trim() || !content.trim()}>
+                    <Button onClick={handleSubmit} className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white font-extrabold rounded-full px-10 py-2.5 shadow-xl border-2 border-[#00e4ff]/40 text-lg hover:from-[#00BFFF] hover:to-[#FF88FF] animate-glow" disabled={isLoading || !title.trim() || !content.trim()}>
                         {isLoading ? '发布中...' : '发布'}
                     </Button>
                 </div>

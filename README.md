@@ -1,6 +1,23 @@
+
 # 未来感极简社区系统
 
+## ⚡ 融合 InterKnot 代码说明
+
+本项目部分功能/设计灵感融合自 [InterKnot (share121/inter_knot)](https://github.com/share121/inter_knot)（MIT License，见下方出处说明）：
+
+- 参考/借鉴了 InterKnot 的部分 API 设计、数据结构、成就/签到/讨论区等交互理念
+- 未来可选集成 InterKnot 的 Dart/Flutter 端作为桌面/移动客户端（详见 `inter-knot-2.16.9-36` 文件夹）
+- 相关 Dart 脚本（如 `gen_secrets.dart`）和部分 UI 设计已作为额外功能/参考实现收录
+- 版权及开源协议遵循 InterKnot [MIT License](./inter-knot-2.16.9-36/LICENSE)
+
+> 本系统与 InterKnot 互为独立实现，部分功能/数据结构/交互方式可互通或参考融合，欢迎二次开发与创新集成。
+
 ## 项目亮点
+
+### 🧩 额外功能/参考实现
+- Dart/Flutter 端（见 `inter-knot-2.16.9-36` 文件夹）：可作为桌面/移动端原生客户端参考
+- API 结构、成就/签到/讨论区等部分交互理念参考自 InterKnot
+- 相关脚本如 `gen_secrets.dart` 可用于密钥管理/自动生成
 
 - 🚀 极简高端UI：全站采用Tailwind CSS + neon/glass/3D风格，动画细腻，视觉未来感十足
 - 🧑‍💻 个人主页创新：支持头像上传/AI生成、资料编辑、等级/勋章/活跃度动画、打赏历史、3D卡片、主题切换

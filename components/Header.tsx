@@ -45,14 +45,15 @@ export default function Header() {
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-      className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl mx-auto glass-effect rounded-b-2xl border-b border-l border-r border-t-0 border-[#00E4FF]/30 shadow-2xl flex flex-col md:flex-row items-center justify-between p-4 backdrop-blur-xl"
+      className="fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl mx-auto bg-gradient-to-br from-[#181824ee] via-[#232946cc] to-[#1A1A2Ecc] border-b-2 border-[#00E4FF]/40 shadow-[0_8px_32px_#00e4ff33] rounded-b-3xl flex flex-col md:flex-row items-center justify-between p-4 backdrop-blur-2xl ring-2 ring-[#00E4FF]/30 ring-inset"
+      style={{ boxShadow: '0 8px 32px #00e4ff33, 0 0 0 2px #00e4ff44 inset' }}
     >
       <div className="flex items-center space-x-4 mb-4 md:mb-0">
-        <Image src="/logo.png" alt="绳网" width={40} height={40} className="w-10 h-10" />
-        <h1 className="text-2xl font-bold text-[#00E4FF] neon-text">绳网终端</h1>
+        <Image src="/logo.png" alt="绳网" width={40} height={40} className="w-12 h-12 drop-shadow-glow" />
+        <h1 className="text-3xl font-extrabold text-[#00E4FF] neon-text drop-shadow-glow tracking-widest">绳网终端</h1>
       </div>
 
-      <nav className="flex flex-wrap justify-center md:justify-start gap-2">
+  <nav className="flex flex-wrap justify-center md:justify-start gap-2">
         <TooltipProvider>
           {navItems.map((item) => (
             <Tooltip key={item.view}>
@@ -60,9 +61,9 @@ export default function Header() {
                 <Button
                   variant="ghost"
                   onClick={() => setView(item.view)}
-                  className={`relative flex items-center space-x-2 text-white/70 hover:text-white transition-all duration-300 rounded-xl px-4 py-2
+                  className={`relative flex items-center space-x-2 text-white/80 hover:text-white transition-all duration-300 rounded-2xl px-5 py-2 text-lg font-bold tracking-wide
                     ${activeView === item.view 
-                      ? 'bg-gradient-to-r from-[#00E4FF]/20 to-[#FF00FF]/20 text-[#00E4FF] border border-[#00E4FF]/50 shadow-lg shadow-[#00E4FF]/25' 
+                      ? 'bg-gradient-to-r from-[#00E4FF]/30 to-[#FF00FF]/20 text-[#00E4FF] border-2 border-[#00E4FF]/60 shadow-lg shadow-[#00E4FF]/25 animate-glow' 
                       : 'hover:bg-white/10 hover:scale-105'
                     }`}
                 >
