@@ -59,8 +59,8 @@ export default function RootLayout({
             </filter>
           </svg>
         </div>
-        <SignInPanel />
         {showSplash && <SplashParticles onFinish={() => setShowSplash(false)} />}
+        <SignInPanel />
         <div style={{ opacity: showSplash ? 0 : 1, transition: 'opacity 0.8s' }}>
           {children}
         </div>
@@ -69,5 +69,7 @@ export default function RootLayout({
         </div>
       </body>
     </html>
-  )
+  );
 }
+
+// ...existing code...
