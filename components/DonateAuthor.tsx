@@ -17,29 +17,17 @@ export default function DonateAuthor() {
   };
 
   return (
-    <div className="glass-effect border-glow p-6 rounded-xl max-w-xs mx-auto text-center space-y-4">
-      <h3 className="text-xl font-bold neon-text">支持网站作者</h3>
-      <p className="text-[var(--light-gray)] text-sm">如果你喜欢本站，欢迎打赏支持作者持续优化和维护！</p>
-      <div className="flex items-center justify-center gap-2">
-        <input
-          type="number"
-          min={1}
-          max={999}
-          value={amount}
-          onChange={e => setAmount(Number(e.target.value))}
-          className="w-20 px-2 py-1 rounded border border-[var(--neon-blue)] bg-transparent text-white text-center focus:outline-none"
-          disabled={isPaying || success}
-        />
-        <span className="text-[var(--neon-blue)] font-bold">元</span>
-      </div>
+    <div className="glass-effect border-glow p-4 rounded-xl max-w-xs mx-auto text-center space-y-3 animate-fade-in">
+      <h3 className="text-lg font-bold neon-text">请作者喝一杯奶茶 🧋</h3>
+      <p className="text-[var(--light-gray)] text-xs">如果你觉得本站有趣或有用，可以请作者喝一杯奶茶（10元），让本站持续运营和创新！</p>
       <Button
         onClick={handleDonate}
         className="w-full bg-[var(--neon-blue)] text-[var(--dark-blue)] hover:bg-[var(--neon-pink)] hover:text-white border-glow mt-2"
         disabled={isPaying || success}
       >
-        {isPaying ? '支付中...' : success ? '感谢支持！' : `打赏作者`}
+        {isPaying ? '奶茶正在冲泡...' : success ? '感谢你的奶茶！' : `打赏 10 元`}
       </Button>
-      {success && <div className="text-[var(--neon-green)] mt-2">已收到你的支持 ❤</div>}
+      {success && <div className="text-[var(--neon-green)] mt-2">已收到你的奶茶 ❤</div>}
     </div>
   );
 }

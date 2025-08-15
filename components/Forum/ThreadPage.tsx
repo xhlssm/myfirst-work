@@ -27,7 +27,27 @@ import { isImageUrl } from '@/lib/utils';
 
 export default function ThreadPage() {
     const { threads, users, user, setView, activeView, selectedUsername, addReply, toggleLike, toggleDislike, updateMissionSubtask, submitMissionSolution, approveMission } = useStore();
-    const [replyContent, setReplyContent] = useState('');
+        const [replyContent, setReplyContent] = useState('');
+        const [showEmoji, setShowEmoji] = useState(false);
+    // 丰富表情、颜文字、表情包（仅安全字符）
+    const emojiList: string[] = [
+        '😀','😂','😍','🥰','😎','😭','😡','👍','👏','🎉','🔥','💡','🤔','🥳','😏','😅','😱','🤖','🧋','🍕','🌈','⭐','💯',
+        '(๑•̀ㅂ•́)و✧','(｡･ω･｡)ﾉ♡','(╯°□°）╯︵ ┻━┻','(￣▽￣)ノ','(ಥ_ಥ)','( •̀ ω •́ )✧','(≧∇≦)ﾉ','(づ｡◕‿‿◕｡)づ','(ง •_•)ง','(｡•́︿•̀｡)','(￣3￣)a','(๑>؂<๑)','( ˘ ³˘)♥','(๑•́ ₃ •̀๑)','(ง •̀_•́)ง','(｡•̀ᴗ-)✧','(｡･∀･)ﾉﾞ','(｡•ω•｡)ﾉ♡','(｡♥‿♥｡)','(๑˃̵ᴗ˂̵)و','(๑´ڡ`๑)','(๑•̀o•́๑)۶ FIGHT!','(๑>◡<๑)','(๑¯∀¯๑)','(๑´ㅂ`๑)','(๑´ㅂ`๑)♡*.+゜'
+    ];
+    // 插入表情到光标处
+    const insertEmoji = (emoji: string) => {
+        if (!replyRef.current) return;
+        const textarea = replyRef.current as HTMLTextAreaElement;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const before = replyContent.slice(0, start);
+        const after = replyContent.slice(end);
+        setReplyContent(before + emoji + after);
+        setTimeout(() => {
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+        }, 0);
+    };
     const [replyToId, setReplyToId] = useState<number | null>(null);
     const [missionSolution, setMissionSolution] = useState('');
     const [preview, setPreview] = useState(false);
@@ -56,8 +76,11 @@ export default function ThreadPage() {
     const isContentImage = isImageUrl(safeContent);
     const sortedReplies = useMemo(() => thread.replies.slice().sort((a, b) => a.timestamp - b.timestamp), [thread.replies]);
 
+    // ...existing code...
+    // 帖子详情底部打赏作者
+    const DonateAuthor = require('../DonateAuthor').default;
     return (
-        <main className="max-w-3xl mx-auto py-8 space-y-8" tabIndex={-1} aria-label="帖子详情主内容区">
+    <main className="max-w-2xl mx-auto py-8 space-y-8 px-2 md:px-0" tabIndex={-1} aria-label="帖子详情主内容区">
             {/* 面包屑导航 */}
             <nav aria-label="breadcrumb" className="mb-4 flex items-center text-sm text-[var(--light-gray)] space-x-2">
                 <Button
@@ -70,8 +93,8 @@ export default function ThreadPage() {
                 <span className="mx-1">/</span>
                 <span className="truncate max-w-[120px] md:max-w-xs" title={thread.title}>{thread.title}</span>
             </nav>
-            <article className="glass-effect-strong border-glow card-hover" itemScope itemType="https://schema.org/DiscussionForumPosting">
-                <header className="p-6 border-b border-glow">
+            <article className="glass-effect-strong border-glow card-hover rounded-2xl overflow-hidden" itemScope itemType="https://schema.org/DiscussionForumPosting">
+                <header className="p-6 border-b border-glow bg-[#181824]/80">
                     <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4 space-y-2 md:space-y-0">
                         {thread.type === 'mission' && thread.missionDetails && (
                             <MissionCard
@@ -98,7 +121,7 @@ export default function ThreadPage() {
                         <Badge className="border-glow neon-text-pink w-fit">任务</Badge>
                     )}
                 </header>
-                <section className="p-4 md:p-6 markdown-content glass-effect border-glow custom-scrollbar" itemProp="articleBody">
+                <section className="p-4 md:p-6 markdown-content glass-effect border-glow custom-scrollbar bg-[#232946]/60" itemProp="articleBody">
                     {isContentImage ? (
                         <img
                             src={safeContent}
@@ -109,7 +132,7 @@ export default function ThreadPage() {
                         />
                     ) : HTMLReactParser(safeContent)}
                 </section>
-                <footer className="flex flex-wrap items-center gap-2 md:space-x-4 p-4 md:p-6 border-t border-glow">
+                <footer className="flex flex-wrap items-center gap-2 md:space-x-4 p-4 md:p-6 border-t border-glow bg-[#181824]/80 rounded-b-2xl">
                                 <Button
                                     variant="ghost"
                                     className="btn-glow text-[var(--light-gray)] hover:text-[var(--neon-green)]"
@@ -170,7 +193,7 @@ export default function ThreadPage() {
                 {/* 已用上方 div 包裹，无需重复结构，去除多余标签 */}
 
             {user && (
-                <div className="mt-8 space-y-4">
+                <div className="mt-8 space-y-4 bg-[#181824]/70 rounded-xl p-4 shadow-lg">
                     <h3 className="text-xl md:text-2xl font-bold neon-text-pink">发表回复</h3>
                     {replyToId && (
                         <div className="p-2 glass-effect border-glow rounded-md flex items-center justify-between text-[var(--light-gray)]">
@@ -179,11 +202,23 @@ export default function ThreadPage() {
                         </div>
                     )}
                     <div className="space-y-2">
+                        <div className="flex items-center gap-2 mb-1">
+                            <button type="button" className="ml-2 text-[var(--neon-blue)] text-sm px-2 py-1 rounded hover:bg-[#232946] border border-[var(--neon-blue)]/40" onClick={()=>setShowEmoji(v=>!v)}>
+                                {showEmoji ? '关闭表情' : '😀 表情'}
+                            </button>
+                        </div>
+                        {showEmoji && (
+                            <div className="flex flex-wrap gap-1 p-2 bg-[#232946] border border-[var(--neon-blue)] rounded mb-2 max-w-xs animate-fade-in">
+                                {emojiList.map(e=>(
+                                    <button key={e} type="button" className="text-2xl hover:scale-125 transition-all" onClick={()=>insertEmoji(e)}>{e}</button>
+                                ))}
+                            </div>
+                        )}
                         <Textarea
                             ref={replyRef}
                             value={replyContent}
                             onChange={(e) => setReplyContent(e.target.value)}
-                            placeholder="输入你的回复... 支持图片/视频URL，支持Markdown格式。"
+                            placeholder="输入你的回复... 支持图片/视频URL，支持Markdown/表情/颜文字格式。"
                             className="glass-effect border-glow text-[var(--foreground)] h-24 md:h-32 custom-scrollbar"
                             aria-label="回复内容"
                             maxLength={500}
@@ -220,6 +255,12 @@ export default function ThreadPage() {
                     </div>
                 </div>
             )}
+            {/* 打赏作者区块 */}
+            <div className="mt-8 flex justify-center">
+                <div className="w-full max-w-xs">
+                    <DonateAuthor />
+                </div>
+            </div>
     </main>
     );
 }

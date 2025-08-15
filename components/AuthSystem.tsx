@@ -85,6 +85,8 @@ export default function AuthSystem() {
   const [isProfileEdit, setIsProfileEdit] = useState(false);
   // 敏感操作按钮加冷却锁
   const [actionLock, setActionLock] = useState(false);
+  // 访客模式
+  const [guestMode, setGuestMode] = useState(false);
 
   // 切换登录/注册时自动清空错误和验证码
   useEffect(() => {
@@ -191,6 +193,8 @@ export default function AuthSystem() {
       }
       if (formData.password.length < 6) {
         newErrors.password = '密码长度至少6位';
+      } else if (!/[A-Za-z]/.test(formData.password) || !/\d/.test(formData.password)) {
+        newErrors.password = '密码需包含字母和数字';
       }
     }
 
@@ -272,6 +276,19 @@ export default function AuthSystem() {
         <LangSwitcher />
         <PluginCenter />
         <UserProfile username={user.username} />
+      </div>
+    );
+  }
+
+  if (guestMode) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="glass-effect-strong border-glow p-8 rounded-2xl mt-16 text-center max-w-lg">
+          <h2 className="text-2xl font-bold neon-text mb-4">访客模式</h2>
+          <p className="mb-6 text-[var(--light-gray)]">你正在以访客身份浏览，部分互动功能受限。注册/登录可解锁全部体验。</p>
+          <Button className="bg-[var(--neon-blue)] text-white btn-glow mb-2" onClick={()=>setGuestMode(false)}>返回登录/注册</Button>
+          {/* 这里可集成主站核心区块或跳转首页 */}
+        </div>
       </div>
     );
   }
@@ -500,7 +517,7 @@ export default function AuthSystem() {
           </Button>
 
           {/* 切换模式 */}
-          <div className="text-center">
+          <div className="flex justify-between items-center mt-6">
             <Button
               type="button"
               variant="ghost"
@@ -508,6 +525,9 @@ export default function AuthSystem() {
               className="text-white/70 hover:text-white hover:bg-white/10"
             >
               {isLogin ? '还没有账号？立即注册' : '已有账号？立即登录'}
+            </Button>
+            <Button variant="ghost" className="text-[var(--neon-blue)] hover:underline" onClick={()=>setGuestMode(true)}>
+              以访客身份体验
             </Button>
           </div>
         </form>

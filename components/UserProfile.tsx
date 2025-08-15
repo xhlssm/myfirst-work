@@ -34,6 +34,10 @@ export default function UserProfile({ username }: { username: string }) {
     const [achievements] = useState([
       '未来先锋', '社区达人', '打赏之星', 'AI体验官'
     ]);
+    const [equippedAchievement, setEquippedAchievement] = useState('未来先锋');
+    const allAchievements = [
+      '未来先锋', '社区达人', '打赏之星', 'AI体验官', '签到王', '任务达人', '派系领袖', '热心解答', '内容创作者', 'BUG猎人'
+    ];
 
     useEffect(() => {
         setIsClient(true);
@@ -46,6 +50,13 @@ export default function UserProfile({ username }: { username: string }) {
             setEditedBio(profileUser.bio);
             setEditedAvatar(profileUser.avatarUrl);
         }
+    }, [profileUser]);
+
+    // 若profileUser有equippedAchievement则同步
+    useEffect(() => {
+      if (profileUser && profileUser.equippedAchievement) {
+        setEquippedAchievement(profileUser.equippedAchievement);
+      }
     }, [profileUser]);
 
     if (!isClient || !profileUser) {
@@ -202,6 +213,22 @@ export default function UserProfile({ username }: { username: string }) {
                             {achievements.map(a=>(<span key={a} className="level-badge diamond animate-gradient-text">{a}</span>))}
                           </div>
                         </div>
+                        {/* 成就佩戴选择区块，仅本人可见 */}
+                        {isCurrentUserProfile && (
+                          <div className="mt-4">
+                            <div className="text-xs text-[#B0B0CC] mb-1">选择佩戴的成就（聊天和资料页展示）</div>
+                            <div className="flex gap-2 flex-wrap">
+                              {allAchievements.map(a=>(
+                                <button
+                                  key={a}
+                                  onClick={()=>setEquippedAchievement(a)}
+                                  className={`level-badge ${equippedAchievement===a?'diamond animate-glow':'silver'} transition border-2 ${equippedAchievement===a?'border-[var(--neon-blue)]':'border-transparent'}`}
+                                >{a}</button>
+                              ))}
+                            </div>
+                            <div className="mt-2 text-xs text-green-400">当前佩戴：{equippedAchievement}</div>
+                          </div>
+                        )}
                         {/* 动画反馈提示 */}
                         <div className="mt-2">
                           <span className="text-xs text-green-400 animate-fade-in">{autoSaveMsg}</span>
