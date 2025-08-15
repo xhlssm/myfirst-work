@@ -1,8 +1,9 @@
+
+"use client";
 import type { Metadata } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import DonateAuthor from '@/components/DonateAuthor';
-"use client";
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import SignInPanel from '../components/ui/SignInPanel';
