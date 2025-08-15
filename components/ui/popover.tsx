@@ -1,10 +1,41 @@
+// 通用错误边界高阶组件
+// ...existing code...
+class ErrorBoundary extends React.Component<{ fallback?: React.ReactNode; children?: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { fallback?: React.ReactNode; children?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any, info: any) {
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('UI组件错误:', error, info);
+    }
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div style={{color:'#f00'}}>组件加载失败</div>;
+    }
+    return this.props.children;
+  }
+}
+
+function withErrorBoundary<T>(Component: React.ComponentType<T>, fallback?: React.ReactNode) {
+  return function Wrapper(props: T) {
+    return (
+      <ErrorBoundary fallback={fallback}>
+        <Component {...props} />
+      </ErrorBoundary>
+    );
+  };
+}
 "use client"
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 import { cn } from "@/lib/utils"
 const Popover = PopoverPrimitive.Root
 const PopoverTrigger = PopoverPrimitive.Trigger
-const PopoverContent = React.forwardRef<
+const PopoverContentBase = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
@@ -21,5 +52,6 @@ const PopoverContent = React.forwardRef<
     />
   </PopoverPrimitive.Portal>
 ))
-PopoverContent.displayName = PopoverPrimitive.Content.displayName
+PopoverContentBase.displayName = PopoverPrimitive.Content.displayName
+const PopoverContent = withErrorBoundary(PopoverContentBase);
 export { Popover, PopoverTrigger, PopoverContent }

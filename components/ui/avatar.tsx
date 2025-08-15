@@ -1,9 +1,44 @@
 "use client";
+
 import * as React from "react";
 import * as RadixAvatar from "@radix-ui/react-avatar";
 import { cn } from "@/lib/utils";
 
-export const Avatar = React.forwardRef<
+// 通用错误边界高阶组件
+class ErrorBoundary extends React.Component<{ fallback?: React.ReactNode; children?: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { fallback?: React.ReactNode; children?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any, info: any) {
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('UI组件错误:', error, info);
+    }
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div style={{color:'#f00'}}>组件加载失败</div>;
+    }
+    return this.props.children;
+  }
+}
+
+function withErrorBoundary<T>(Component: React.ComponentType<T>, fallback?: React.ReactNode) {
+  return function Wrapper(props: T) {
+    return (
+      <ErrorBoundary fallback={fallback}>
+        <Component {...props} />
+      </ErrorBoundary>
+    );
+  };
+}
+
+
+const AvatarBase = React.forwardRef<
   React.ElementRef<typeof RadixAvatar.Root>,
   React.ComponentPropsWithoutRef<typeof RadixAvatar.Root>
 >(({ className, ...props }, ref) => (
@@ -16,17 +51,21 @@ export const Avatar = React.forwardRef<
     {...props}
   />
 ));
-Avatar.displayName = "Avatar";
+AvatarBase.displayName = "Avatar";
+export const Avatar = withErrorBoundary(AvatarBase);
 
-export const AvatarImage = React.forwardRef<
+
+const AvatarImageBase = React.forwardRef<
   React.ElementRef<typeof RadixAvatar.Image>,
   React.ComponentPropsWithoutRef<typeof RadixAvatar.Image>
 >(({ className, ...props }, ref) => (
   <RadixAvatar.Image ref={ref} className={cn("aspect-square h-full w-full", className)} {...props} />
 ));
-AvatarImage.displayName = "AvatarImage";
+AvatarImageBase.displayName = "AvatarImage";
+export const AvatarImage = withErrorBoundary(AvatarImageBase);
 
-export const AvatarFallback = React.forwardRef<
+
+const AvatarFallbackBase = React.forwardRef<
   React.ElementRef<typeof RadixAvatar.Fallback>,
   React.ComponentPropsWithoutRef<typeof RadixAvatar.Fallback>
 >(({ className, ...props }, ref) => (
@@ -39,6 +78,7 @@ export const AvatarFallback = React.forwardRef<
     {...props}
   />
 ));
-AvatarFallback.displayName = "AvatarFallback";
+AvatarFallbackBase.displayName = "AvatarFallback";
+export const AvatarFallback = withErrorBoundary(AvatarFallbackBase);
 
 

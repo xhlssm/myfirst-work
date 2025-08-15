@@ -38,6 +38,13 @@ const SplashParticles: React.FC<{ onFinish?: () => void }> = ({ onFinish }) => {
 
     let start: number | null = null;
     let fadeOut = false;
+    let finished = false;
+
+    function safeFinish() {
+      if (finished) return;
+      finished = true;
+      if (onFinish) onFinish();
+    }
 
     function draw(ts: number) {
       if (!start) start = ts;
@@ -61,7 +68,7 @@ const SplashParticles: React.FC<{ onFinish?: () => void }> = ({ onFinish }) => {
       if (fadeOut) {
         fadeRef.current += 16 / FADE_DURATION;
         if (fadeRef.current >= 1) {
-          if (onFinish) onFinish();
+          safeFinish();
           return;
         }
       }
@@ -83,8 +90,14 @@ const SplashParticles: React.FC<{ onFinish?: () => void }> = ({ onFinish }) => {
       fadeOut = true;
     }, 1200);
 
+    // 兜底：2.5秒后强制触发onFinish，彻底防止卡死
+    const forceFinishTimer = setTimeout(() => {
+      safeFinish();
+    }, 2500);
+
     return () => {
       clearTimeout(timer);
+      clearTimeout(forceFinishTimer);
       window.removeEventListener('resize', handleResize);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };

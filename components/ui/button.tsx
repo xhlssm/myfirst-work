@@ -1,3 +1,34 @@
+// 通用错误边界高阶组件
+// ...existing code...
+class ErrorBoundary extends React.Component<{ fallback?: React.ReactNode; children?: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { fallback?: React.ReactNode; children?: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any, info: any) {
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('UI组件错误:', error, info);
+    }
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || <div style={{color:'#f00'}}>组件加载失败</div>;
+    }
+    return this.props.children;
+  }
+}
+
+function withErrorBoundary<T>(Component: React.ComponentType<T>, fallback?: React.ReactNode) {
+  return function Wrapper(props: T) {
+    return (
+      <ErrorBoundary fallback={fallback}>
+        <Component {...props} />
+      </ErrorBoundary>
+    );
+  };
+}
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -38,7 +69,7 @@ export interface ButtonProps
   asChild?: boolean
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const ButtonBase = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
@@ -50,6 +81,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
   }
 )
-Button.displayName = "Button"
-
+ButtonBase.displayName = "Button"
+const Button = withErrorBoundary(ButtonBase);
 export { Button, buttonVariants }
