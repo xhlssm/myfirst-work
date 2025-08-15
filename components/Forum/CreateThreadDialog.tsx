@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useState, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import VoiceInput from '../ui/VoiceInput';
 
 interface CreateThreadDialogProps {
     isOpen: boolean;
@@ -54,35 +55,6 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
             onClose();
         }, 600);
     };
-                    {/* 标签输入区 */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <label htmlFor="tags" className="text-right text-[#B0B0CC]">标签</label>
-                        <div className="col-span-3 flex flex-wrap items-center gap-2">
-                            {tags.map((tag, idx) => (
-                                <span key={tag+idx} className="bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1">
-                                    {tag}
-                                    <button type="button" className="ml-1 text-xs text-[var(--neon-pink)] hover:underline" onClick={() => setTags(tags.filter((t, i) => i !== idx))}>×</button>
-                                </span>
-                            ))}
-                            <input
-                                id="tags"
-                                type="text"
-                                value={tagInput}
-                                onChange={e => setTagInput(e.target.value)}
-                                onKeyDown={e => {
-                                    if ((e.key === 'Enter' || e.key === ',' || e.key === ' ') && tagInput.trim()) {
-                                        e.preventDefault();
-                                        if (!tags.includes(tagInput.trim()) && tags.length < 5) setTags([...tags, tagInput.trim()]);
-                                        setTagInput('');
-                                    }
-                                }}
-                                className="bg-transparent border-b border-[var(--neon-blue)] text-white w-24 focus:outline-none"
-                                placeholder="回车添加，最多5个"
-                                maxLength={12}
-                                disabled={isLoading || tags.length >= 5}
-                            />
-                        </div>
-                    </div>
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -112,12 +84,18 @@ export default function CreateThreadDialog({ isOpen, onClose }: CreateThreadDial
                         <label htmlFor="title" className="text-right text-[#B0B0CC]">
                             标题
                         </label>
-                        <Input
-                            id="title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="col-span-3 bg-transparent text-white border-[#00E4FF]"
-                        />
+                        <div className="col-span-3 flex items-center gap-2">
+                            <Input
+                                id="title"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                placeholder="标题"
+                                className="bg-transparent border-b border-[var(--neon-blue)] text-white"
+                                maxLength={40}
+                                disabled={isLoading}
+                            />
+                            <VoiceInput onResult={txt => setTitle(txt)} />
+                        </div>
                     </div>
                     {threadType === 'mission' && (
                         <div className="grid grid-cols-4 items-center gap-4">

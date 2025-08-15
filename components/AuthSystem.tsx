@@ -13,7 +13,8 @@ interface AuthFormData {
   bio: string;
   faction: string;
 }
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,18 +33,27 @@ import {
   X,
   Shield,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Star
 } from 'lucide-react';
 import { useStore } from '@/store';
-
-
+import dynamic from 'next/dynamic';
+// 动态import重型组件
+const WebGLParticles = dynamic(() => import('./ui/WebGLParticles'), { ssr: false });
+const PWAPrompt = dynamic(() => import('./ui/PWAPrompt'), { ssr: false });
+const AIAssistant = dynamic(() => import('./ui/AIAssistant'), { ssr: false });
+const AchievementSystem = dynamic(() => import('./ui/AchievementSystem'), { ssr: false });
+const ThemeCustomizer = dynamic(() => import('./ui/ThemeCustomizer'), { ssr: false });
+const AIRecommender = dynamic(() => import('./ui/AIRecommender'), { ssr: false });
+const LangSwitcher = dynamic(() => import('./ui/LangSwitcher'), { ssr: false });
+const PluginCenter = dynamic(() => import('./ui/PluginCenter'), { ssr: false });
+const UserProfile = dynamic(() => import('./UserProfile'), { ssr: false });
 
 export default function AuthSystem() {
   const { login, register, user } = useStore();
 
   // 状态分组：认证流程
   const [isLogin, setIsLogin] = useState(true);
-  const [isProfileEdit, setIsProfileEdit] = useState(false);
   const [authMethod, setAuthMethod] = useState<'email' | 'phone'>('email');
   const [isLoading, setIsLoading] = useState(false);
   // 密码可见性
@@ -70,6 +80,11 @@ export default function AuthSystem() {
   const [errors, setErrors] = useState<Partial<AuthFormData>>({});
   // 顶部验证码提示条
   const [codeTip, setCodeTip] = useState('');
+
+  // 个人资料编辑相关状态
+  const [isProfileEdit, setIsProfileEdit] = useState(false);
+  // 敏感操作按钮加冷却锁
+  const [actionLock, setActionLock] = useState(false);
 
   // 切换登录/注册时自动清空错误和验证码
   useEffect(() => {
@@ -212,195 +227,52 @@ export default function AuthSystem() {
     }
   };
 
+  // 资料保存事件
   const handleProfileUpdate = async () => {
-    if (!user) return;
-    
     setIsLoading(true);
-    
-    try {
-      // 这里应该调用更新用户资料的API
-      console.log('更新用户资料:', formData);
-      setIsProfileEdit(false);
-    } catch (error) {
-      console.error('更新失败:', error);
-    } finally {
+    // 模拟异步保存
+    setTimeout(() => {
       setIsLoading(false);
-    }
+      setIsProfileEdit(false);
+      // 实际应调用后端API保存
+    }, 1200);
   };
 
-  const handleInputChange = (field: keyof AuthFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+  // 事件处理全部useCallback包裹，减少闭包和重渲染
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(f => ({ ...f, [name]: DOMPurify.sanitize(value) }));
+  }, []);
+  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(f => ({ ...f, [name]: DOMPurify.sanitize(value) }));
+  }, []);
+  // 敏感操作加冷却锁
+  const safeAction = useCallback(async (fn:()=>Promise<void>|void, cooldown=1000) => {
+    if (actionLock) return;
+    setActionLock(true);
+    try {
+      await fn();
+    } catch (e) {
+      alert('操作失败，请重试！');
+    } finally {
+      setTimeout(()=>setActionLock(false), cooldown);
     }
-  };
+  }, [actionLock]);
 
   if (user) {
     return (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10">
-            <User className="w-4 h-4 mr-2" />
-            个人资料
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="glass-effect-strong border-[#00E4FF]/50 max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold neon-text">个人资料</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-6">
-            {/* 头像区域 */}
-            <div className="text-center">
-              <div className="relative inline-block">
-                <img
-                  src={formData.avatarUrl}
-                  alt="头像"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-[#00E4FF]/30"
-                  onError={e => {
-                    const target = e.currentTarget;
-                    target.onerror = null;
-                    target.src = 'https://via.placeholder.com/150?text=No+Image';
-                  }}
-                />
-                {isProfileEdit && (
-                  <Button
-                    size="sm"
-                    className="absolute bottom-0 right-0 bg-[#00E4FF] hover:bg-[#00E4FF]/90"
-                  >
-                    <Camera className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* 用户信息 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">用户名</label>
-                {isProfileEdit ? (
-                  <Input
-                    value={formData.username}
-                    onChange={(e) => handleInputChange('username', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
-                    placeholder="用户名 (2-12字)"
-                    aria-describedby={errors.username ? 'username-error' : undefined}
-                    aria-invalid={!!errors.username}
-                  />
-                ) : (
-                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                    <span className="text-white">{user.username}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">邮箱</label>
-                {isProfileEdit ? (
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
-                    aria-describedby={errors.email ? 'email-error' : undefined}
-                    aria-invalid={!!errors.email}
-                  />
-                ) : (
-                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                    <span className="text-white">{user.email}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">手机号</label>
-                {isProfileEdit ? (
-                  <Input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
-                    aria-describedby={errors.phone ? 'phone-error' : undefined}
-                    aria-invalid={!!errors.phone}
-                  />
-                ) : (
-                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                    <span className="text-white">{user.phone || '未设置'}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">派系</label>
-                {isProfileEdit ? (
-                  <Input
-                    value={formData.faction}
-                    onChange={(e) => handleInputChange('faction', e.target.value)}
-                    className="bg-white/10 border-white/20 text-white transition-all duration-200"
-                  />
-                ) : (
-                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                    <span className="text-white">{user.faction || '自由人'}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 个人简介 */}
-            <div>
-              <label className="block text-sm font-medium text-white/70 mb-2">个人简介</label>
-              {isProfileEdit ? (
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                  rows={3}
-                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white resize-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
-                  placeholder="介绍一下你自己...（可选）"
-                  aria-describedby={errors.bio ? 'bio-error' : undefined}
-                  aria-invalid={!!errors.bio}
-                />
-              ) : (
-                <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                  <span className="text-white">{user.bio || '这个人很懒，什么都没写...'}</span>
-                </div>
-              )}
-            </div>
-
-            {/* 操作按钮 */}
-            <div className="flex justify-end space-x-3">
-              {isProfileEdit ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsProfileEdit(false)}
-                    className="border-white/20 text-white hover:bg-white/10"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    取消
-                  </Button>
-                  <Button
-                    onClick={handleProfileUpdate}
-                    disabled={isLoading}
-                    className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow"
-                    aria-disabled={isLoading}
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {isLoading ? '保存中...' : '保存'}
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={() => setIsProfileEdit(true)}
-                  className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow"
-                >
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  编辑资料
-                </Button>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <div className="relative min-h-screen flex flex-col items-center justify-center animate-gradient-bg">
+        <WebGLParticles />
+        <PWAPrompt />
+        <AIAssistant />
+        <AchievementSystem />
+        <ThemeCustomizer />
+        <AIRecommender />
+        <LangSwitcher />
+        <PluginCenter />
+        <UserProfile username={user.username} />
+      </div>
     );
   }
 
@@ -481,7 +353,7 @@ export default function AuthSystem() {
                 <Input
                   type="text"
                   value={formData.username}
-                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  onChange={handleInputChange}
                   className="pl-10 bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
                   placeholder="请输入用户名"
                   autoComplete="username"
@@ -513,7 +385,7 @@ export default function AuthSystem() {
               <Input
                 type={authMethod === 'email' ? 'email' : 'tel'}
                 value={authMethod === 'email' ? formData.email : formData.phone}
-                onChange={(e) => handleInputChange(authMethod, e.target.value)}
+                onChange={handleInputChange}
                 className="pl-10 bg-white/10 border-white/20 text-white flex-1 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
                 placeholder={authMethod === 'email' ? '邮箱地址（必填）' : '手机号码（必填）'}
                 autoComplete={authMethod === 'email' ? 'email' : 'tel'}
@@ -538,7 +410,7 @@ export default function AuthSystem() {
               <Input
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
+                onChange={(e) => handleInputChange(e)}
                 className="pl-10 pr-10 bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
                 placeholder="密码（6位以上）"
                 autoComplete="current-password"
@@ -578,7 +450,7 @@ export default function AuthSystem() {
                 <Input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  onChange={(e) => handleInputChange(e)}
                   className="pl-10 pr-10 bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] focus:shadow-[0_0_8px_2px_var(--neon-blue)] hover:border-[var(--neon-pink)] hover:shadow-[0_0_8px_2px_var(--neon-pink)] hover:scale-105 transition-all duration-200"
                   placeholder="确认密码"
                   autoComplete="new-password"

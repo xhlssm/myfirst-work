@@ -78,7 +78,7 @@ export default function FactionPage({ factionId }: { factionId: Faction | null }
                             .map((member, idx) => (
                                 <li key={member.id} className="flex items-center space-x-2">
                                     <span className={`font-bold ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-orange-400' : 'text-white'}`}>{idx + 1}.</span>
-                                    <img src={member.avatarUrl} alt={member.username} className="w-8 h-8 rounded-full" />
+                                    <img src={member.avatarUrl} alt={member.username} className="w-8 h-8 rounded-full" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://via.placeholder.com/64?text=No+Img'; }} />
                                     <span className="text-white">{member.username}</span>
                                     <span className="ml-auto text-[var(--neon-blue)]">{member.reputation} 声望</span>
                                 </li>
@@ -122,7 +122,7 @@ export default function FactionPage({ factionId }: { factionId: Faction | null }
                             const u = users.find(x => x.id === msg.userId);
                             return (
                                 <div key={msg.id} className="flex items-start gap-3">
-                                    <img src={u?.avatarUrl} alt={u?.username} className="w-8 h-8 rounded-full" />
+                                    <img src={u?.avatarUrl} alt={u?.username} className="w-8 h-8 rounded-full" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://via.placeholder.com/64?text=No+Img'; }} />
                                     <div className="flex-1">
                                         <div className="bg-[#232946] rounded-lg px-3 py-2 text-white text-sm">{msg.content}</div>
                                         <div className="text-xs text-[var(--light-gray)] mt-1 flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function FactionPage({ factionId }: { factionId: Faction | null }
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {members.map(member => (
                             <div key={member.id} className="p-4 bg-[#24243D] rounded-md flex flex-col md:flex-row items-center md:space-x-4 space-y-2 md:space-y-0">
-                                <img src={member.avatarUrl} alt={member.username} className="w-12 h-12 rounded-full" />
+                                <img src={member.avatarUrl} alt={member.username} className="w-12 h-12 rounded-full" onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://via.placeholder.com/96?text=No+Img'; }} />
                                 <div className="flex-1 min-w-0">
                                     <span className="text-white font-bold text-base">{member.username}</span>
                                     <div className="text-xs text-[var(--light-gray)] mt-1">贡献度：{member.reputation} | 活跃度：{Math.floor((member.level || 1) * 10 + (member.experience || 0) / 100)}</div>
