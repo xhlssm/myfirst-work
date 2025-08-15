@@ -1,13 +1,63 @@
 'use client';
+
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import DonateAuthor from '@/components/DonateAuthor';
 import SignInPanel from '@/components/ui/SignInPanel';
 
-const SplashParticles = dynamic(() => import('@/components/ui/SplashParticles'), { ssr: false });
+// 错误边界组件
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any, info: any) {
+    // 可上报错误
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('SplashParticles error:', error, info);
+    }
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div style={{position:'fixed',inset:0,background:'#181824',zIndex:9999,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>动画加载失败</div>;
+    }
+    return this.props.children;
+  }
+}
+
+const SplashParticles = dynamic(
+  () => import('@/components/ui/SplashParticles'),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{position:'fixed',inset:0,background:'#181824',zIndex:9999,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>
+        动画加载中...
+      </div>
+    ),
+  }
+);
 
 export default function ClientRoot({ children }: { children: React.ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
+  const [splashTimeout, setSplashTimeout] = useState(false);
+
+  // 动画超时兜底（如动画组件未加载或onFinish未触发，3秒后自动关闭）
+  React.useEffect(() => {
+    if (!showSplash) return;
+    const timer = setTimeout(() => {
+      setSplashTimeout(true);
+      setShowSplash(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [showSplash]);
+
+  // loading时主内容渐显，避免白屏
+  const mainOpacity = showSplash ? 0.2 : 1;
+
   return (
     <div
       className='min-h-screen text-white'
@@ -44,9 +94,13 @@ export default function ClientRoot({ children }: { children: React.ReactNode }) 
           </filter>
         </svg>
       </div>
-      {showSplash && <SplashParticles onFinish={() => setShowSplash(false)} />}
+      {showSplash && !splashTimeout && (
+        <ErrorBoundary>
+          <SplashParticles onFinish={() => setShowSplash(false)} />
+        </ErrorBoundary>
+      )}
       <SignInPanel />
-      <div style={{ opacity: showSplash ? 0 : 1, transition: 'opacity 0.8s' }}>{children}</div>
+      <div style={{ opacity: mainOpacity, transition: 'opacity 0.8s' }}>{children}</div>
       <div className='fixed bottom-6 right-6 z-50'>
         <DonateAuthor />
       </div>
