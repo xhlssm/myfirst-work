@@ -1,3 +1,4 @@
+"use client";
 // 通用错误边界高阶组件
 // ...existing code...
 class ErrorBoundary extends React.Component<{ fallback?: React.ReactNode; children?: React.ReactNode }, { hasError: boolean }> {
@@ -29,10 +30,9 @@ function withErrorBoundary<T>(Component: React.ComponentType<T>, fallback?: Reac
     );
   };
 }
-"use client"
-import * as React from "react"
-import * as PopoverPrimitive from "@radix-ui/react-popover"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
+import { cn } from "@/lib/utils";
 const Popover = PopoverPrimitive.Root
 const PopoverTrigger = PopoverPrimitive.Trigger
 const PopoverContentBase = React.forwardRef<

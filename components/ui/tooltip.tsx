@@ -1,3 +1,4 @@
+"use client";
 // 通用错误边界高阶组件
 // ...existing code...
 class ErrorBoundary extends React.Component<{ fallback?: React.ReactNode; children?: React.ReactNode }, { hasError: boolean }> {
@@ -29,10 +30,9 @@ function withErrorBoundary<T>(Component: React.ComponentType<T>, fallback?: Reac
     );
   };
 }
-"use client"
-import * as React from "react"
-import * as TooltipPrimitive from "@radix-ui/react-tooltip"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { cn } from "@/lib/utils";
 const TooltipProvider = TooltipPrimitive.Provider
 const Tooltip = TooltipPrimitive.Root
 const TooltipTrigger = TooltipPrimitive.Trigger
