@@ -17,38 +17,35 @@ export default function ClientRoot({ children }: { children: React.ReactNode }) 
     <div
       className='min-h-screen text-white'
       style={{
-        background: 'linear-gradient(135deg, #181824 0%, #232946 60%, #1A1A2E 100%)',
+        /* 绳网风格多层渐变+网格 */
+        background: `
+          radial-gradient(circle at 20% 80%, rgba(0, 228, 255, 0.10) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.10) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+          linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 25%, #16213e 50%, #1a1a2e 75%, #0a0a1a 100%)
+        `,
+        backgroundSize: '400% 400%, 300% 300%, 200% 200%, 400% 400%',
         position: 'relative',
         overflowX: 'hidden',
       }}
     >
       {/* 赛博发光线条背景 */}
+      {/* 绳网风格网格叠加 */}
       <div
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 0,
           pointerEvents: 'none',
+          backgroundImage: `
+            linear-gradient(rgba(0,228,255,0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,228,255,0.02) 1px, transparent 1px),
+            linear-gradient(rgba(255,0,255,0.01) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255,0,255,0.01) 2px, transparent 2px)
+          `,
+          backgroundSize: '100px 100px, 100px 100px, 200px 200px, 200px 200px',
         }}
-      >
-        <svg width='100vw' height='100vh' style={{ width: '100vw', height: '100vh', display: 'block' }}>
-          <defs>
-            <linearGradient id='glow1' x1='0' y1='0' x2='1' y2='1'>
-              <stop offset='0%' stopColor='#00e4ff' stopOpacity='0.2' />
-              <stop offset='100%' stopColor='#ff00ff' stopOpacity='0.1' />
-            </linearGradient>
-          </defs>
-          <line x1='0' y1='0' x2='100vw' y2='100vh' stroke='url(#glow1)' strokeWidth='4' filter='url(#glow)' />
-          <line x1='0' y1='100vh' x2='100vw' y2='0' stroke='url(#glow1)' strokeWidth='2' filter='url(#glow)' />
-          <filter id='glow'>
-            <feGaussianBlur stdDeviation='8' result='coloredBlur' />
-            <feMerge>
-              <feMergeNode in='coloredBlur' />
-              <feMergeNode in='SourceGraphic' />
-            </feMerge>
-          </filter>
-        </svg>
-      </div>
+      />
       <SignInPanel />
   <div className="fade-in slide-up scale-in" style={{ transition: 'opacity 0.8s' }}>{children}</div>
       <div className='fixed bottom-6 right-6 z-50'>
