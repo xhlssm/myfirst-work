@@ -1,94 +1,51 @@
+
 "use client";
-import { useState } from "react";
-import { useStore, Faction as FactionType } from "@/store";
-import Header from "@/components/Header";
-import GuideSystem from "@/components/GuideSystem";
-import AuthSystem from "@/components/AuthSystem";
-import { Button } from "@/components/ui/button";
-import { HelpCircle } from "lucide-react";
-import dynamic from "next/dynamic";
-const Forum = dynamic(() => import("@/components/Forum/Forum"), { ssr: false });
-const Leaderboard = dynamic(() => import("@/components/Leaderboard"));
-const Factions = dynamic(() => import("@/components/Factions"));
-const FactionPage = dynamic(() => import("@/components/FactionPage"));
-const UserProfile = dynamic(() => import("@/components/UserProfile"));
-const Shop = dynamic(() => import("@/components/Shop"));
-const Achievements = dynamic(() => import("@/components/Achievements"));
-const AdminPanel = dynamic(() => import("@/components/AdminPanel"));
-const Messages = dynamic(() => import("@/components/Message"));
-import NotificationPopup from "@/components/NotificationPopup";
+import { useStore, Faction as FactionType } from "../store";
+import Forum from "../components/Forum/Forum";
+import UserProfile from "../components/UserProfile";
+import Shop from "../components/Shop";
+import Leaderboard from "../components/Leaderboard";
+import Achievements from "../components/Achievements";
+import FactionPage from "../components/FactionPage";
+import AdminPanel from "../components/AdminPanel";
 
-export default function App() {
-  const { activeView, selectedUsername } = useStore();
-  const [showGuide, setShowGuide] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+// ================= 导入区 =================
 
-  const renderContent = () => {
-    switch (activeView) {
-      case "forum":
-        return <Forum />;
-      case "leaderboard":
-        return <Leaderboard />;
-      case "factions":
-        return <Factions />;
-      case "faction_page":
-        return <FactionPage factionId={(selectedUsername as FactionType | null) ?? null} />;
-      case "profile":
-        return typeof selectedUsername === "string" ? (
-          <UserProfile username={selectedUsername} />
-        ) : null;
-      case "shop":
-        return <Shop />;
-      case "achievements":
-        return <Achievements />;
-      case "messages":
-        return <Messages />;
-      case "admin":
-        return <AdminPanel />;
-      default:
-        return <Forum />;
-    }
-  };
+export default function Page() {
+  const { activeView, selectedUsername, user } = useStore();
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white relative overflow-hidden">
-      {/* 动态背景装饰 */}
-      <div className="fixed inset-0 bg-gradient-radial opacity-30"></div>
-      
-      {/* 浮动光点 */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-20 left-20 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-32 w-1 h-1 bg-pink-400 rounded-full animate-ping"></div>
-        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"></div>
-        <div className="absolute top-1/2 right-20 w-1 h-1 bg-purple-400 rounded-full animate-pulse"></div>
-      </div>
-      
-      <Header />
-      <NotificationPopup />
-      
-      {/* 引导按钮 */}
-      <div className="fixed top-24 right-4 z-40">
-        <Button
-          onClick={() => setShowGuide(true)}
-          className="bg-gradient-to-r from-[#00E4FF] to-[#FF00FF] text-white hover:from-[#00E4FF]/90 hover:to-[#FF00FF]/90 btn-glow rounded-full w-12 h-12 p-0"
-        >
-          <HelpCircle className="w-6 h-6" />
-        </Button>
-      </div>
-      
-      {/* 认证系统 */}
-      <div className="fixed top-24 right-20 z-40">
-        <AuthSystem />
-      </div>
-      
-      <main className="relative z-10 p-4 pt-20 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          {renderContent()}
-        </div>
-      </main>
-      
-      {/* 引导系统 */}
-      <GuideSystem isVisible={showGuide} onClose={() => setShowGuide(false)} />
-    </div>
-  );
+  switch (activeView) {
+    case "forum":
+      return <Forum />;
+    case "profile":
+      return <UserProfile username={selectedUsername as string} />;
+    case "shop":
+      return <Shop />;
+    case "leaderboard":
+      return <Leaderboard />;
+    case "achievements":
+      return <Achievements />;
+    case "faction_page":
+      return (
+        <>
+          <FactionPage factionId={(selectedUsername as FactionType | null) ?? null} />
+          {/* 帮派内聊天功能入口（预留） */}
+          <div style={{marginTop:32,background:'#181824cc',borderRadius:12,padding:'20px 16px',boxShadow:'0 2px 16px #00e4ff22'}}>
+            <div style={{fontSize:20,fontWeight:600,color:'#00e4ff',marginBottom:8}}>帮派聊天</div>
+            <div style={{color:'#e0eaff',fontSize:15,marginBottom:12}}>与帮派成员实时交流、分享资源、协作任务。<br />（功能即将上线，敬请期待！）</div>
+            {/* 未来可在此集成实时聊天组件，如 WebSocket 聊天、消息列表、输入框等 */}
+          </div>
+        </>
+      );
+    case "factions":
+      return <div className="text-center text-[#00e4ff] text-2xl mt-20">派系功能即将上线</div>;
+    case "messages":
+      return <div className="text-center text-[#00e4ff] text-2xl mt-20">消息中心即将上线</div>;
+    case "admin":
+      return <AdminPanel />;
+    default:
+      return <Forum />;
+  }
 }
+
+// ================= 组件实现 =================
