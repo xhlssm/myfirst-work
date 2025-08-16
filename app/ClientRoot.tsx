@@ -2,65 +2,17 @@
 // ================= 导入区 =================
 'use client';
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
 import DonateAuthor from '@/components/DonateAuthor';
 import SignInPanel from '@/components/ui/SignInPanel';
 
 // ================= 错误边界区 =================
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: any, info: any) {
-    if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.error('SplashParticles error:', error, info);
-    }
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div style={{position:'fixed',inset:0,background:'#181824',zIndex:9999,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>动画加载失败</div>;
-    }
-    return this.props.children;
-  }
-}
+
 
 // ================= 动态组件区 =================
-const SplashParticles = dynamic(
-  () => import('@/components/ui/SplashParticles'),
-  {
-    ssr: false,
-    loading: () => (
-      <div style={{position:'fixed',inset:0,background:'#181824',zIndex:9999,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>
-        动画加载中...
-      </div>
-    ),
-  }
-);
+
 
 // ================= 组件实现 =================
 export default function ClientRoot({ children }: { children: React.ReactNode }) {
-  const [showSplash, setShowSplash] = useState(true);
-  const [splashTimeout, setSplashTimeout] = useState(false);
-
-  // 动画超时兜底（如动画组件未加载或onFinish未触发，3秒后自动关闭）
-  React.useEffect(() => {
-    if (!showSplash) return;
-    const timer = setTimeout(() => {
-      setSplashTimeout(true);
-      setShowSplash(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [showSplash]);
-
-  // loading时主内容渐显，动画期间不可交互
-  const mainOpacity = showSplash ? 0.2 : 1;
-  const mainPointerEvents = showSplash ? 'none' : 'auto';
-
   return (
     <div
       className='min-h-screen text-white'
@@ -97,21 +49,8 @@ export default function ClientRoot({ children }: { children: React.ReactNode }) 
           </filter>
         </svg>
       </div>
-      {showSplash && !splashTimeout && (
-        <ErrorBoundary>
-          <SplashParticles onFinish={() => setShowSplash(false)} />
-        </ErrorBoundary>
-      )}
       <SignInPanel />
-      <div
-        style={{
-          opacity: mainOpacity,
-          pointerEvents: mainPointerEvents,
-          transition: 'opacity 0.8s',
-        }}
-      >
-        {children}
-      </div>
+  <div className="fade-in slide-up scale-in" style={{ transition: 'opacity 0.8s' }}>{children}</div>
       <div className='fixed bottom-6 right-6 z-50'>
         <DonateAuthor />
       </div>
