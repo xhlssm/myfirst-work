@@ -1,3 +1,111 @@
+/* --- 潮流艺术风格增强 --- */
+.touchable-card, .glass-card, .card-hover, .glass-effect {
+  background: rgba(40, 40, 50, 0.55);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.18), 0 1.5px 8px 0 rgba(255,153,0,0.08);
+  backdrop-filter: blur(18px) saturate(1.2);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  transition: box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.touchable-card::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 80%;
+  height: 40%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 100%);
+  border-radius: 50%;
+  filter: blur(6px);
+  transform: translateX(-50%) scaleY(0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.touchable-card:active, .card-hover:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px 0 rgba(255,153,0,0.10);
+}
+
+.btn-primary, .vote-button, button[type="submit"] {
+  /* 保持橙色主色，增加浮雕和高光 */
+  box-shadow: 0 2px 8px rgba(255,153,0,0.10), 0 1.5px 8px 0 rgba(255,255,255,0.08) inset;
+  border: 1.5px solid rgba(255,255,255,0.10);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after, .vote-button::after, button[type="submit"]::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 60%;
+  height: 40%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.01) 100%);
+  border-radius: 50%;
+  filter: blur(8px);
+  transform: translateX(-50%) scaleY(0.7);
+  pointer-events: none;
+  z-index: 1;
+}
+.btn-primary:active, .vote-button:active, button[type="submit"]:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px 0 rgba(255,153,0,0.10);
+}
+
+/* 交互高亮动画 */
+.touchable-card:hover, .glass-card:hover, .card-hover:hover {
+  box-shadow: 0 8px 32px 0 rgba(255,153,0,0.16), 0 2px 16px 0 rgba(255,255,255,0.10);
+  border-color: rgba(255,153,0,0.18);
+  transition: box-shadow 0.2s cubic-bezier(0.4,0,0.2,1), border-color 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+/* 轻量淡入淡出、位移、缩放动画 */
+.fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.fade-out {
+  animation: fadeOut 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.slide-down {
+  animation: slideDown 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.scale-out {
+  animation: scaleOut 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes scaleOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.92); }
+}
 /* 慢速旋转动画，用于neon标签等 */
 .animate-spin-slow {
   animation: spin 3.5s linear infinite;
@@ -30,9 +138,6 @@
   box-shadow: 0 0 32px 8px var(--neon-blue), 0 0 16px 4px var(--neon-pink), 0 8px 40px 0 rgba(62,207,255,0.15);
   border: 2px solid var(--neon-blue);
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @font-face {
   font-family: 'Terminus';
@@ -41,38 +146,40 @@
   font-style: normal;
 }
 
+
 :root {
-  --background: 220 16% 12%; /* 柔和深蓝灰 */
-  --foreground: 220 20% 96%; /* 柔和亮灰 */
-  --card: 220 16% 16%;
-  --card-foreground: 220 20% 96%;
-  --popover: 220 16% 18%;
-  --popover-foreground: 220 20% 96%;
-  --primary: 217 91% 60%; /* 柔和蓝 */
-  --primary-foreground: 220 20% 96%;
-  --secondary: 260 10% 30%; /* 柔和紫灰 */
-  --secondary-foreground: 220 20% 96%;
-  --muted: 220 10% 24%;
-  --muted-foreground: 220 10% 60%;
-  --accent: 200 100% 85%; /* 柔和青蓝 */
-  --accent-foreground: 220 20% 96%;
+  --background: 220 8% 14%; /* 低明度低纯度高级灰 */
+  --foreground: 220 10% 85%; /* 柔和亮灰 */
+  --card: 220 8% 18%;
+  --card-foreground: 220 10% 85%;
+  --popover: 220 8% 20%;
+  --popover-foreground: 220 10% 85%;
+  --primary: 30 98% 58%; /* 亮橙色按钮 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 260 6% 28%; /* 更低纯度紫灰 */
+  --secondary-foreground: 220 10% 85%;
+  --muted: 220 6% 22%;
+  --muted-foreground: 220 6% 60%;
+  --accent: 200 20% 60%; /* 低纯度青蓝 */
+  --accent-foreground: 220 10% 85%;
   --destructive: 0 70% 50%;
-  --destructive-foreground: 220 20% 96%;
-  --border: 220 10% 30%;
-  --input: 220 10% 24%;
-  --ring: 217 91% 60%;
+  --destructive-foreground: 220 10% 85%;
+  --border: 220 6% 28%;
+  --input: 220 6% 22%;
+  --ring: 30 98% 58%;
   --radius: 0.5rem;
 
-  --neon-blue: #3ECFFF; /* 柔和蓝 */
-  --neon-pink: #FF7EDB; /* 柔和粉 */
-  --neon-green: #5FFFB0; /* 柔和绿 */
-  --neon-purple: #B39DFF; /* 柔和紫 */
-  --dark-blue: #232946;   /* 柔和深蓝 */
-  --light-gray: #E0E3EB;  /* 柔和浅灰 */
-  --dark-gray: #232946;   /* 柔和深灰 */
+  --neon-blue: #3ECFFF;
+  --neon-pink: #FF7EDB;
+  --neon-green: #5FFFB0;
+  --neon-purple: #B39DFF;
+  --dark-blue: #232946;
+  --light-gray: #E0E3EB;
+  --dark-gray: #232946;
   --gold: #FFD700;
   --silver: #C0C0C0;
   --bronze: #CD7F32;
+  --futuristic-orange: #FF9900;
 }
 
 .dark-theme {
@@ -480,19 +587,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* 投票和悬赏样式 */
-.vote-button {
-  background: linear-gradient(135deg, var(--neon-green), var(--neon-blue));
+
+.vote-button, .btn-primary, button[type="submit"] {
+  background: linear-gradient(90deg, var(--futuristic-orange), #FFB84D 80%);
   border: none;
-  color: white;
+  color: #fff;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(255,153,0,0.10);
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
-.vote-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+.vote-button:hover, .btn-primary:hover, button[type="submit"]:hover {
+  background: linear-gradient(90deg, #FFB84D, var(--futuristic-orange) 80%);
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 24px rgba(255,153,0,0.18);
 }
 
 .bounty-tag {
@@ -505,32 +617,6 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
 }
 
-@layer utilities {
-  .text-shadow {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  }
-  
-  .bg-gradient-radial {
-    background: radial-gradient(ellipse at center, rgba(0, 228, 255, 0.1) 0%, transparent 70%);
-  }
-  
-  .border-glow {
-    border: 1px solid var(--neon-blue);
-    box-shadow: 0 0 10px rgba(0, 228, 255, 0.5);
-  }
-  
-  .text-glow {
-    text-shadow: 0 0 10px currentColor;
-  }
-  
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-}
 
 .markdown-content h1,
 .markdown-content h2,
