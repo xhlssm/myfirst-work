@@ -1,3 +1,4 @@
+// ================= i18n多语言实现 =================
 // 简易i18n实现，支持多语言切换
 export const locales = {
   zh: {
@@ -46,6 +47,12 @@ export const locales = {
   }
 };
 
+
+/**
+ * 获取多语言文本
+ * @param key 词条key
+ * @param lang 语言（zh/en）
+ */
 export function t(key: string, lang: 'zh'|'en' = 'zh') {
   return locales[lang][key] || key;
 }

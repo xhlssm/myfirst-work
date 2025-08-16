@@ -15,6 +15,9 @@ const setSignInStatus = () => {
 const SignInPanel: React.FC = () => {
   const [signedIn, setSignedIn] = useState(getSignInStatus());
   const [msg, setMsg] = useState('');
+  // ================= 导入区 =================
+  // ...existing code...
+  // ================= 组件实现 =================
 
   const handleSignIn = () => {
     setSignInStatus();

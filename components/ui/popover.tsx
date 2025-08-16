@@ -1,5 +1,9 @@
 "use client";
 // 通用错误边界高阶组件
+// ================= 导入区 =================
+// ...existing code...
+
+// ================= 组件实现 =================
 // ...existing code...
 class ErrorBoundary extends React.Component<{ fallback?: React.ReactNode; children?: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { fallback?: React.ReactNode; children?: React.ReactNode }) {

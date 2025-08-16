@@ -1,7 +1,9 @@
 // 主题色自定义组件，支持主色、渐变、暗色、霓虹等实时预览
+// ================= 导入区 =================
 'use client';
 import { useState } from 'react';
 import { Palette } from 'lucide-react';
+// ================= 组件实现 =================
 
 const themes = [
   { name: '默认', class: 'default', color: '#3ECFFF' },

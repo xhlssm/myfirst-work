@@ -1,5 +1,7 @@
+// ================= 导入区 =================
 import { create } from 'zustand';
 
+// ================= 类型定义区 =================
 // 定义基础数据类型
 export interface FactionBoardMessage {
     id: number;
@@ -144,6 +146,7 @@ interface Actions {
     checkDailyTasks: () => void;
 }
 
+// ================= Mock数据区 =================
 const mockUsers: User[] = [
     { id: 1, username: 'Cypher', email: 'cypher@shangwang.com', phone: '13800138001', avatarUrl: 'https://cdn.pixabay.com/photo/2023/04/23/12/37/cyborg-7945532_1280.png', reputation: 1500, status: 'online', title: '绳网大师', bio: 'AI核心研究员。', faction: '开发组', badges: ['leader', 'coder'], isAdmin: true, lastOnline: Date.now(), unlockedAchievements: [], level: 15, experience: 15000, equippedAchievement: '未来先锋' },
     { id: 2, username: 'Nomad', email: 'nomad@shangwang.com', phone: '13800138002', avatarUrl: 'https://cdn.pixabay.com/photo/2023/06/15/09/20/cyberpunk-8064560_1280.jpg', reputation: 850, status: 'away', title: '流浪黑客', bio: '自由的灵魂，穿梭于数据洪流。', faction: '剧情组', badges: ['writer'], isAdmin: false, lastOnline: Date.now() - 3600000, unlockedAchievements: [], level: 8, experience: 8000, equippedAchievement: '社区达人' },
@@ -196,6 +199,7 @@ const mockFactions = [
 
 let nextId = 1000;
 
+// ================= Zustand全局状态实现区 =================
 export const useStore = create<State & Actions>((set, get) => ({
     // State
     users: mockUsers,

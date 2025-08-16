@@ -1,7 +1,9 @@
+// ================= 导入区 =================
 // 语音识别输入组件，支持发帖/评论语音转文字
-'use client';
+"use client";
 import { useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
+// ================= 组件实现 =================
 
 export default function VoiceInput({ onResult }: { onResult: (text: string) => void }) {
   const [listening, setListening] = useState(false);

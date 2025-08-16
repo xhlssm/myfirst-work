@@ -1,11 +1,12 @@
-'use client';
 
+// ================= 导入区 =================
+'use client';
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import DonateAuthor from '@/components/DonateAuthor';
 import SignInPanel from '@/components/ui/SignInPanel';
 
-// 错误边界组件
+// ================= 错误边界区 =================
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
@@ -15,7 +16,6 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     return { hasError: true };
   }
   componentDidCatch(error: any, info: any) {
-    // 可上报错误
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
       console.error('SplashParticles error:', error, info);
@@ -29,6 +29,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
+// ================= 动态组件区 =================
 const SplashParticles = dynamic(
   () => import('@/components/ui/SplashParticles'),
   {
@@ -41,6 +42,7 @@ const SplashParticles = dynamic(
   }
 );
 
+// ================= 组件实现 =================
 export default function ClientRoot({ children }: { children: React.ReactNode }) {
   const [showSplash, setShowSplash] = useState(true);
   const [splashTimeout, setSplashTimeout] = useState(false);
@@ -55,8 +57,9 @@ export default function ClientRoot({ children }: { children: React.ReactNode }) 
     return () => clearTimeout(timer);
   }, [showSplash]);
 
-  // loading时主内容渐显，避免白屏
+  // loading时主内容渐显，动画期间不可交互
   const mainOpacity = showSplash ? 0.2 : 1;
+  const mainPointerEvents = showSplash ? 'none' : 'auto';
 
   return (
     <div
@@ -100,7 +103,15 @@ export default function ClientRoot({ children }: { children: React.ReactNode }) 
         </ErrorBoundary>
       )}
       <SignInPanel />
-      <div style={{ opacity: mainOpacity, transition: 'opacity 0.8s' }}>{children}</div>
+      <div
+        style={{
+          opacity: mainOpacity,
+          pointerEvents: mainPointerEvents,
+          transition: 'opacity 0.8s',
+        }}
+      >
+        {children}
+      </div>
       <div className='fixed bottom-6 right-6 z-50'>
         <DonateAuthor />
       </div>

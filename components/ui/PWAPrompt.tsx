@@ -2,6 +2,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+// ================= 导入区 =================
+// PWA 安装提示组件，支持自动检测与手动触发
 export default function PWAPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [show, setShow] = useState(false);
@@ -16,6 +18,7 @@ export default function PWAPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+// ================= 组件实现 =================
   const handleInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
