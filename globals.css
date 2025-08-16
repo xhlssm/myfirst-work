@@ -1,4 +1,5 @@
 /* --- 潮流艺术风格增强 --- */
+/* --- 潮流艺术风格增强 --- */
 .touchable-card, .glass-card, .card-hover, .glass-effect {
   background: rgba(40, 40, 50, 0.55);
   border-radius: 18px;
@@ -7,36 +8,52 @@
   border: 1.5px solid rgba(255,255,255,0.08);
   transition: box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), transform 0.2s cubic-bezier(0.4,0,0.2,1);
   position: relative;
-  overflow: hidden;
-}
 
-.touchable-card::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 80%;
-  height: 40%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 100%);
-  border-radius: 50%;
-  filter: blur(6px);
-  transform: translateX(-50%) scaleY(0.7);
-  pointer-events: none;
-  z-index: 1;
-}
 
-.touchable-card:active, .card-hover:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 8px 0 rgba(255,153,0,0.10);
-}
+  :root.dark-theme {
+    --background: hsl(224, 71.4%, 4.1%);
+    --foreground: hsl(210, 20%, 98%);
+    --card: hsl(224, 71.4%, 4.1%);
+    --card-foreground: hsl(210, 20%, 98%);
+    --primary: hsl(210, 20%, 98%);
+    --primary-foreground: hsl(220, 39%, 11%);
+  }
 
-.btn-primary, .vote-button, button[type="submit"] {
-  /* 保持橙色主色，增加浮雕和高光 */
-  box-shadow: 0 2px 8px rgba(255,153,0,0.10), 0 1.5px 8px 0 rgba(255,255,255,0.08) inset;
-  border: 1.5px solid rgba(255,255,255,0.10);
-  position: relative;
-  overflow: hidden;
-}
+  :root.high-contrast-theme {
+    --background: hsl(0, 0%, 0%);
+    --foreground: hsl(0, 0%, 100%);
+    --card: hsl(0, 0%, 0%);
+    --card-foreground: hsl(0, 0%, 100%);
+    --primary: hsl(0, 0%, 100%);
+    --primary-foreground: hsl(0, 0%, 0%);
+    --secondary: hsl(0, 0%, 100%);
+    --secondary-foreground: hsl(0, 0%, 0%);
+    --border: hsl(0, 0%, 100%);
+    --input: hsl(0, 0%, 100%);
+    --ring: hsl(0, 0%, 100%);
+    --neon-blue: #00FF00;
+    --neon-pink: #FFFF00;
+  }
+
+  :root.cyberpunk-theme {
+    --background: hsl(240, 20%, 8%);
+    --foreground: hsl(220, 100%, 70%);
+    --card: hsl(240, 10%, 12%);
+    --card-foreground: hsl(220, 100%, 70%);
+    --primary: hsl(290, 100%, 50%);
+    --primary-foreground: hsl(240, 20%, 8%);
+    --secondary: hsl(220, 100%, 70%);
+    --secondary-foreground: hsl(240, 20%, 8%);
+    --muted: hsl(240, 10%, 18%);
+    --muted-foreground: hsl(220, 100%, 70%);
+    --accent: hsl(240, 10%, 18%);
+    --accent-foreground: hsl(220, 100%, 70%);
+    --border: hsl(240, 10%, 18%);
+    --input: hsl(240, 10%, 18%);
+    --ring: hsl(290, 100%, 50%);
+    --neon-blue: #00E4FF;
+    --neon-pink: #FF00FF;
+  }
 .btn-primary::after, .vote-button::after, button[type="submit"]::after {
   content: '';
   position: absolute;
@@ -110,119 +127,55 @@
 .animate-spin-slow {
   animation: spin 3.5s linear infinite;
 }
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes dialog-pop {
-  0% {
-    opacity: 0;
-    transform: scale(0.85) translateY(40px);
-    filter: blur(8px);
-  }
-  80% {
-    filter: blur(0px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0px);
-  }
-}
-
-.animate-dialog-pop {
-  animation: dialog-pop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.neon-glow {
-  box-shadow: 0 0 32px 8px var(--neon-blue), 0 0 16px 4px var(--neon-pink), 0 8px 40px 0 rgba(62,207,255,0.15);
-  border: 2px solid var(--neon-blue);
-}
-
-@font-face {
-  font-family: 'Terminus';
-  src: url('/fonts/TerminusTTF-4.47.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
 }
 
 
-:root {
-  --background: 220 8% 14%; /* 低明度低纯度高级灰 */
-  --foreground: 220 10% 85%; /* 柔和亮灰 */
-  --card: 220 8% 18%;
-  --card-foreground: 220 10% 85%;
-  --popover: 220 8% 20%;
-  --popover-foreground: 220 10% 85%;
-  --primary: 30 98% 58%; /* 亮橙色按钮 */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 260 6% 28%; /* 更低纯度紫灰 */
-  --secondary-foreground: 220 10% 85%;
-  --muted: 220 6% 22%;
-  --muted-foreground: 220 6% 60%;
-  --accent: 200 20% 60%; /* 低纯度青蓝 */
-  --accent-foreground: 220 10% 85%;
-  --destructive: 0 70% 50%;
-  --destructive-foreground: 220 10% 85%;
-  --border: 220 6% 28%;
-  --input: 220 6% 22%;
-  --ring: 30 98% 58%;
-  --radius: 0.5rem;
 
-  --neon-blue: #3ECFFF;
-  --neon-pink: #FF7EDB;
-  --neon-green: #5FFFB0;
-  --neon-purple: #B39DFF;
-  --dark-blue: #232946;
-  --light-gray: #E0E3EB;
-  --dark-gray: #232946;
-  --gold: #FFD700;
-  --silver: #C0C0C0;
-  --bronze: #CD7F32;
-  --futuristic-orange: #FF9900;
-}
+
 
 .dark-theme {
-  --background: 224 71.4% 4.1%;
-  --foreground: 210 20% 98%;
-  --card: 224 71.4% 4.1%;
-  --card-foreground: 210 20% 98%;
-  --primary: 210 20% 98%;
-  --primary-foreground: 220.9 39.3% 11%;
+  --background: hsl(224, 71.4%, 4.1%);
+  --foreground: hsl(210, 20%, 98%);
+  --card: hsl(224, 71.4%, 4.1%);
+  --card-foreground: hsl(210, 20%, 98%);
+  --primary: hsl(210, 20%, 98%);
+  --primary-foreground: hsl(220, 39%, 11%);
 }
 
+
 .high-contrast-theme {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 100%;
-  --card: 0 0% 0%;
-  --card-foreground: 0 0% 100%;
-  --primary: 0 0% 100%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 0 0% 100%;
-  --secondary-foreground: 0 0% 0%;
-  --border: 0 0% 100%;
-  --input: 0 0% 100%;
-  --ring: 0 0% 100%;
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(0, 0%, 100%);
+  --card: hsl(0, 0%, 0%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --primary: hsl(0, 0%, 100%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(0, 0%, 100%);
+  --secondary-foreground: hsl(0, 0%, 0%);
+  --border: hsl(0, 0%, 100%);
+  --input: hsl(0, 0%, 100%);
+  --ring: hsl(0, 0%, 100%);
   --neon-blue: #00FF00;
   --neon-pink: #FFFF00;
 }
 
+
 .cyberpunk-theme {
-  --background: 240 20% 8%;
-  --foreground: 220 100% 70%;
-  --card: 240 10% 12%;
-  --card-foreground: 220 100% 70%;
-  --primary: 290 100% 50%;
-  --primary-foreground: 240 20% 8%;
-  --secondary: 220 100% 70%;
-  --secondary-foreground: 240 20% 8%;
-  --muted: 240 10% 18%;
-  --muted-foreground: 220 100% 70%;
-  --accent: 240 10% 18%;
-  --accent-foreground: 220 100% 70%;
-  --border: 240 10% 18%;
-  --input: 240 10% 18%;
-  --ring: 290 100% 50%;
+  --background: hsl(240, 20%, 8%);
+  --foreground: hsl(220, 100%, 70%);
+  --card: hsl(240, 10%, 12%);
+  --card-foreground: hsl(220, 100%, 70%);
+  --primary: hsl(290, 100%, 50%);
+  --primary-foreground: hsl(240, 20%, 8%);
+  --secondary: hsl(220, 100%, 70%);
+  --secondary-foreground: hsl(240, 20%, 8%);
+  --muted: hsl(240, 10%, 18%);
+  --muted-foreground: hsl(220, 100%, 70%);
+  --accent: hsl(240, 10%, 18%);
+  --accent-foreground: hsl(220, 100%, 70%);
+  --border: hsl(240, 10%, 18%);
+  --input: hsl(240, 10%, 18%);
+  --ring: hsl(290, 100%, 50%);
   --neon-blue: #00E4FF;
   --neon-pink: #FF00FF;
 }
